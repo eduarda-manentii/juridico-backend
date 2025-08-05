@@ -26,13 +26,13 @@ public class ProcessoDto extends RepresentationModel<ProcessoDto> {
     @NotEmpty(message = "Descrição do caso é obrigatória")
     private String descricaoCaso;
 
-    @NotEmpty(message = "É necessário informar pelo menos uma parte envolvida")
-    private List<ParteEnvolvidaDto> parteEnvolvidaDtos;
-
-    @NotNull(message = "Andamento processual é obrigatório")
-    private AndamentoProcessualDto andamentoProcessualDto;
-
     @NotNull(message = "Status do processo é obrigatório")
     private StatusProcesso status;
+
+    @NotNull(message = "Andamento processual é obrigatório")
+    private Long andamentoProcessualId;
+
+    @NotEmpty(message = "É necessário informar pelo menos uma parte envolvida")
+    private List<Long> parteEnvolvidaIds;
 
 }

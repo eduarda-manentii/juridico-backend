@@ -38,14 +38,14 @@ public class ProcessoServiceImpl implements ProcessoService {
                             "AndamentoProcessual com id " + andamentoId + " não encontrado"));
             processo.setAndamentoProcessual(andamento);
         }
-        if (processo.getParteEnvolvida() != null) {
-            List<ParteEnvolvida> partesGerenciadas = processo.getParteEnvolvida().stream()
-                    .map(parte -> {
-                        if (parte.getId() == null) return parte; // Nova parte, deixa o persist cuidar
-                        return partesEnvolvidasRepository.findById(parte.getId())
-                                .orElseThrow(() -> new EntityNotFoundException("ParteEnvolvida com id " + parte.getId() + " não encontrada"));
-                    })
-                    .collect(Collectors.toList());
+        if (processo.getParteEnvolvida() != null && !processo.getParteEnvolvida().isEmpty()) {
+            List<Long> ids = processo.getParteEnvolvida().stream()
+                    .map(ParteEnvolvida::getId)
+                    .toList();
+            List<ParteEnvolvida> partesGerenciadas = partesEnvolvidasRepository.findAllById(ids);
+            if (partesGerenciadas.size() != ids.size()) {
+                throw new EntityNotFoundException("Uma ou mais partes envolvidas não foram encontradas para os IDs informados.");
+            }
             processo.setParteEnvolvida(partesGerenciadas);
         }
         return processosRepository.save(processo);
@@ -53,12 +53,8 @@ public class ProcessoServiceImpl implements ProcessoService {
 
     @Override
     public Processo buscarPorId(Long id) {
-        Optional<Processo> processoEncontrado = processosRepository.findById(id);
-        if(processoEncontrado.isPresent()) {
-            return processoEncontrado.get();
-        } else {
-            throw new NullPointerException("Não foi encontrado processo para o id informado.");
-        }
+        return processosRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Processo não encontrado para o ID informado."));
     }
 
     @Override
