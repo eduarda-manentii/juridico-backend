@@ -27,4 +27,6 @@ public interface ProcessosRepository extends JpaRepository<Processo, Long> {
             @Param("documento") String documento
     );
 
+    boolean existsByAndamentoProcessual_Id(Long andamentoProcessualId);
+
 }

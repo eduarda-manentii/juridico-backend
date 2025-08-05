@@ -2,6 +2,7 @@ package br.com.attus.gerenciamentoprocessos.exceptions.handler;
 
 
 import br.com.attus.gerenciamentoprocessos.exceptions.DuplicidadeDocumentoException;
+import br.com.attus.gerenciamentoprocessos.exceptions.EntidadeEmUsoException;
 import br.com.attus.gerenciamentoprocessos.exceptions.ObrigatoriedadeIdException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.persistence.EntityNotFoundException;
@@ -76,5 +77,9 @@ public class GlobalExceptionHandler {
         return ex.getMessage();
     }
 
+    @ExceptionHandler(EntidadeEmUsoException.class)
+    public ResponseEntity<String> handleEntidadeEmUsoException(EntidadeEmUsoException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 
 }
