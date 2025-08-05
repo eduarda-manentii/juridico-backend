@@ -1,11 +1,13 @@
 package br.com.attus.gerenciamentoprocessos.service.impl;
 
 import br.com.attus.gerenciamentoprocessos.exceptions.DuplicidadeDocumentoException;
+import br.com.attus.gerenciamentoprocessos.exceptions.EntidadeEmUsoException;
 import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
 import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvidaDocumento;
 import br.com.attus.gerenciamentoprocessos.model.enums.TipoDocumento;
 import br.com.attus.gerenciamentoprocessos.repository.PartesEnvolvidasDocumentosRepository;
 import br.com.attus.gerenciamentoprocessos.repository.PartesEnvolvidasRepository;
+import br.com.attus.gerenciamentoprocessos.repository.ProcessosRepository;
 import br.com.attus.gerenciamentoprocessos.service.ParteEnvolvidaService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -18,10 +20,12 @@ public class ParteEnvolvidaServiceImpl implements ParteEnvolvidaService {
 
     private final PartesEnvolvidasRepository partesEnvolvidasRepository;
     private final PartesEnvolvidasDocumentosRepository partesEnvolvidasDocumentosRepository;
+    private final ProcessosRepository processosRepository;
 
-    public ParteEnvolvidaServiceImpl(PartesEnvolvidasRepository partesEnvolvidasRepository, PartesEnvolvidasDocumentosRepository partesEnvolvidasDocumentosRepository, PartesEnvolvidasDocumentosRepository partesEnvolvidasDocumentosRepository1) {
+    public ParteEnvolvidaServiceImpl(PartesEnvolvidasRepository partesEnvolvidasRepository, PartesEnvolvidasDocumentosRepository partesEnvolvidasDocumentosRepository, PartesEnvolvidasDocumentosRepository partesEnvolvidasDocumentosRepository1, ProcessosRepository processosRepository) {
         this.partesEnvolvidasRepository = partesEnvolvidasRepository;
         this.partesEnvolvidasDocumentosRepository = partesEnvolvidasDocumentosRepository1;
+        this.processosRepository = processosRepository;
     }
 
     @Override
@@ -49,7 +53,11 @@ public class ParteEnvolvidaServiceImpl implements ParteEnvolvidaService {
 
     @Override
     public void excluir(Long id) {
-        this.partesEnvolvidasRepository.deleteById(id);
+        boolean existeEmProcesso = processosRepository.existsByAndamentoProcessual_Id(id);
+        if (existeEmProcesso) {
+            throw new EntidadeEmUsoException("Não é possível excluir. Esta parte envolvida está vinculado a um processo.");
+        }
+        partesEnvolvidasRepository.deleteById(id);
     }
 
     private void normalizarCampos(ParteEnvolvida parteEnvolvida) {

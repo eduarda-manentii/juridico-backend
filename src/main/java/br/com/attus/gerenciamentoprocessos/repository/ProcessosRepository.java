@@ -29,4 +29,6 @@ public interface ProcessosRepository extends JpaRepository<Processo, Long> {
 
     boolean existsByAndamentoProcessual_Id(Long andamentoProcessualId);
 
+    boolean existsByParteEnvolvida_Id(Long parteEnvolvidaId);
+
 }

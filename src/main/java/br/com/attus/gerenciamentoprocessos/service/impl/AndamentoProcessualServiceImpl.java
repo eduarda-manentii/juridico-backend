@@ -38,5 +38,6 @@ public class AndamentoProcessualServiceImpl implements AndamentoProcessualServic
         if (existeEmProcesso) {
             throw new EntidadeEmUsoException("Não é possível excluir. Este andamento processual está vinculado a um processo.");
         }
-        andamentosProcessuaisRepository.deleteById(id);    }
+        andamentosProcessuaisRepository.deleteById(id);
+    }
 }
