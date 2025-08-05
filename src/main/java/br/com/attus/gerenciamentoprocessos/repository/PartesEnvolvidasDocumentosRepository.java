@@ -7,6 +7,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PartesEnvolvidasDocumentosRepository extends JpaRepository<ParteEnvolvidaDocumento, Long> {
 
-    boolean existsByValor(String valor);
-
-}
+  }

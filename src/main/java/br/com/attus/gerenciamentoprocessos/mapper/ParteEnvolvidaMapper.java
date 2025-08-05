@@ -1,7 +1,9 @@
 package br.com.attus.gerenciamentoprocessos.mapper;
 
+import br.com.attus.gerenciamentoprocessos.dto.ParteEnvolvidaDocumentoDto;
 import br.com.attus.gerenciamentoprocessos.dto.ParteEnvolvidaDto;
 import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
+import br.com.attus.gerenciamentoprocessos.model.enums.TipoDocumento;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,7 +19,10 @@ public class ParteEnvolvidaMapper {
         return ParteEnvolvidaDto.builder()
                 .id(parteEnvolvida.getId())
                 .nomeCompleto(parteEnvolvida.getNomeCompleto())
-                .documento(parteEnvolvidaDocumentoMapper.toDto(parteEnvolvida.getDocumento()))
+                .documento(ParteEnvolvidaDocumentoDto.builder()
+                        .tipoDocumento(TipoDocumento.CPF)
+                        .valor("000.000.000-00")
+                        .build())
                 .tipoParteEnvolvida(parteEnvolvida.getTipoParteEnvolvida())
                 .email(parteEnvolvida.getEmail())
                 .telefone(parteEnvolvida.getTelefone())

@@ -1,5 +1,6 @@
 package br.com.attus.gerenciamentoprocessos.mapper;
 
+import br.com.attus.gerenciamentoprocessos.dto.ParteEnvolvidaDocumentoDto;
 import br.com.attus.gerenciamentoprocessos.dto.ParteEnvolvidaDto;
 import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
 import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvidaDocumento;
@@ -69,13 +70,12 @@ class ParteEnvolvidaMapperTest {
                     .email("duda@gmail.com")
                     .telefone("00000")
                     .nomeCompleto("duda")
-                    .documento(ParteEnvolvidaDocumento.builder()
+                    .documento(ParteEnvolvidaDocumentoDto.builder()
                             .tipoDocumento(TipoDocumento.CPF)
                             .valor("000.000.000-00")
                             .build())
                     .build();
         }
-
         @Nested
         class Quando_converter_para_entity {
 
