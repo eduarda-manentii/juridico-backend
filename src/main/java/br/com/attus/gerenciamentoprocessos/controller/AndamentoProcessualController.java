@@ -1,6 +1,7 @@
 package br.com.attus.gerenciamentoprocessos.controller;
 
 import br.com.attus.gerenciamentoprocessos.dto.AndamentoProcessualDto;
+import br.com.attus.gerenciamentoprocessos.exceptions.ObrigatoriedadeIdException;
 import br.com.attus.gerenciamentoprocessos.mapper.AndamentoProcessualMapper;
 import br.com.attus.gerenciamentoprocessos.model.AndamentoProcessual;
 import br.com.attus.gerenciamentoprocessos.service.AndamentoProcessualService;
@@ -35,6 +36,9 @@ public class AndamentoProcessualController {
 
     @PutMapping
     public ResponseEntity<AndamentoProcessualDto> alterar(@Valid @RequestBody AndamentoProcessualDto andamentoProcessualDto) {
+        if (andamentoProcessualDto.getId() == null) {
+            throw new ObrigatoriedadeIdException();
+        }
         AndamentoProcessual salvo = service.salvar(andamentoProcessualMapper.toEntity(andamentoProcessualDto));
         AndamentoProcessualDto dto = andamentoProcessualMapper.toDto(salvo);
         dto.add(linkTo(methodOn(AndamentoProcessualController.class).buscarPorId(salvo.getId())).withSelfRel());

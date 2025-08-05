@@ -1,6 +1,7 @@
 package br.com.attus.gerenciamentoprocessos.controller;
 
 import br.com.attus.gerenciamentoprocessos.dto.ProcessoDto;
+import br.com.attus.gerenciamentoprocessos.exceptions.ObrigatoriedadeIdException;
 import br.com.attus.gerenciamentoprocessos.mapper.ProcessoMapper;
 import br.com.attus.gerenciamentoprocessos.model.Processo;
 import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
@@ -40,6 +41,9 @@ public class ProcessoController {
 
     @PutMapping
     public ResponseEntity<ProcessoDto> alterar(@Valid @RequestBody ProcessoDto processoDto) {
+        if (processoDto.getId() == null) {
+            throw new ObrigatoriedadeIdException();
+        }
         Processo salvo = service.salvar(mapper.toEntity(processoDto));
         ProcessoDto dto = mapper.toDto(salvo);
         dto.add(linkTo(methodOn(ProcessoController.class).buscarPorId(salvo.getId())).withSelfRel());

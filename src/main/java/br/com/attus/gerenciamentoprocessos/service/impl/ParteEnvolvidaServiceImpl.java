@@ -10,6 +10,7 @@ import br.com.attus.gerenciamentoprocessos.service.ParteEnvolvidaService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,42 +26,69 @@ public class ParteEnvolvidaServiceImpl implements ParteEnvolvidaService {
 
     @Override
     public ParteEnvolvida salvar(ParteEnvolvida parteEnvolvida) {
-        String valorDoc = parteEnvolvida.getDocumento().getValor().replaceAll("\\D", "");
-        if (parteEnvolvida.getDocumento().getId() != null) {
-            ParteEnvolvidaDocumento documentoExistente = partesEnvolvidasDocumentosRepository.findById(parteEnvolvida.getDocumento().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Documento não encontrado"));
-            parteEnvolvida.setDocumento(documentoExistente);
-        }
-        if (parteEnvolvida.getDocumento().getTipoDocumento() == TipoDocumento.CPF) {
-            if (partesEnvolvidasRepository.existsByTipoParteEnvolvidaAndDocumento_ValorAndNomeCompleto(
-                    parteEnvolvida.getTipoParteEnvolvida(),
-                    valorDoc,
-                    parteEnvolvida.getNomeCompleto())) {
-                throw new DuplicidadeDocumentoException("Parte envolvida já existente.");
+        normalizarCampos(parteEnvolvida);
+        validarDocumento(parteEnvolvida);
+        if (parteEnvolvida.getId() != null) {
+            ParteEnvolvida existente = partesEnvolvidasRepository.findById(parteEnvolvida.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Parte envolvida não encontrada"));
+            if (!existente.getDocumento().getValor().equals(parteEnvolvida.getDocumento().getValor())) {
+                verificarDuplicidade(parteEnvolvida);
             }
-            if (partesEnvolvidasRepository.existsByTipoDocumentoAndValorAndNomeDiferente(
-                    parteEnvolvida.getTipoParteEnvolvida(),
-                    valorDoc,
-                    parteEnvolvida.getNomeCompleto())) {
-                throw new DuplicidadeDocumentoException("CPF já está associado a outro nome para o mesmo tipo de parte.");
-            }
+        } else {
+            verificarDuplicidade(parteEnvolvida);
         }
         return partesEnvolvidasRepository.save(parteEnvolvida);
     }
 
+
     @Override
     public ParteEnvolvida buscarPorId(Long id) {
-       Optional<ParteEnvolvida> parteEnvolvidaEncontrada = partesEnvolvidasRepository.findById(id);
-       if(parteEnvolvidaEncontrada.isPresent()) {
-           return parteEnvolvidaEncontrada.get();
-       } else {
-          throw new NullPointerException("Não foi encontrada parte envolvida para o id informado.");
-       }
+        return partesEnvolvidasRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Parte envolvida não encontrada para o ID informado."));
     }
 
     @Override
     public void excluir(Long id) {
         this.partesEnvolvidasRepository.deleteById(id);
+    }
+
+    private void normalizarCampos(ParteEnvolvida parteEnvolvida) {
+        String telefoneLimpo = parteEnvolvida.getTelefone().replaceAll("\\D", "");
+        parteEnvolvida.setTelefone(telefoneLimpo);
+        String valorDoc = parteEnvolvida.getDocumento().getValor().replaceAll("\\D", "");
+        parteEnvolvida.getDocumento().setValor(valorDoc);
+    }
+
+    private void validarDocumento(ParteEnvolvida parteEnvolvida) {
+        ParteEnvolvidaDocumento doc = parteEnvolvida.getDocumento();
+        String valor = doc.getValor();
+        TipoDocumento tipo = doc.getTipoDocumento();
+
+        if (tipo == TipoDocumento.CPF && valor.length() != 11) {
+            throw new IllegalArgumentException("CPF inválido: deve conter 11 dígitos.");
+        }
+
+        if (tipo == TipoDocumento.CNPJ && valor.length() != 14) {
+            throw new IllegalArgumentException("CNPJ inválido: deve conter 14 dígitos.");
+        }
+
+        if (doc.getId() != null) {
+            ParteEnvolvidaDocumento existente = partesEnvolvidasDocumentosRepository.findById(doc.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Documento não encontrado"));
+            parteEnvolvida.setDocumento(existente);
+        }
+    }
+
+    private void verificarDuplicidade(ParteEnvolvida parteEnvolvida) {
+        String valorDoc = parteEnvolvida.getDocumento().getValor();
+        List<ParteEnvolvida> existentes = partesEnvolvidasRepository.findByTipoParteEnvolvidaAndDocumentoValor(
+                parteEnvolvida.getTipoParteEnvolvida(),
+                valorDoc);
+        for (ParteEnvolvida existente : existentes) {
+            if (parteEnvolvida.getId() == null || !existente.getId().equals(parteEnvolvida.getId())) {
+                throw new DuplicidadeDocumentoException("Documento já está associado a outro registro.");
+            }
+        }
     }
 
 }
