@@ -1,0 +1,61 @@
+package br.com.attus.gerenciamentoprocessos.controller;
+
+import br.com.attus.gerenciamentoprocessos.dto.ProcessoDto;
+import br.com.attus.gerenciamentoprocessos.mapper.ProcessoMapper;
+import br.com.attus.gerenciamentoprocessos.model.Processo;
+import br.com.attus.gerenciamentoprocessos.service.ProcessoService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+@RestController
+@RequestMapping("/processos")
+public class ProcessoController {
+
+    private final ProcessoService service;
+    private final ProcessoMapper mapper;
+
+    public ProcessoController(ProcessoService service, ProcessoMapper mapper) {
+        this.service = service;
+        this.mapper = mapper;
+    }
+
+    @PostMapping
+    public ResponseEntity<ProcessoDto> inserir(@Valid @RequestBody ProcessoDto processoDto) {
+        Processo salvo = service.salvar(mapper.toEntity(processoDto));
+        ProcessoDto dto = mapper.toDto(salvo);
+        dto.add(linkTo(methodOn(ProcessoController.class).buscarPorId(salvo.getId())).withSelfRel());
+        return ResponseEntity
+                .created(linkTo(methodOn(ProcessoController.class).buscarPorId(salvo.getId())).toUri())
+                .body(dto);
+    }
+
+    @PutMapping
+    public ResponseEntity<ProcessoDto> alterar(@Valid @RequestBody ProcessoDto processoDto) {
+        Processo salvo = service.salvar(mapper.toEntity(processoDto));
+        ProcessoDto dto = mapper.toDto(salvo);
+        dto.add(linkTo(methodOn(ProcessoController.class).buscarPorId(salvo.getId())).withSelfRel());
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProcessoDto> buscarPorId(@PathVariable Long id) {
+        Processo processo = service.buscarPorId(id);
+        ProcessoDto dto = mapper.toDto(processo);
+        dto.add(linkTo(methodOn(ProcessoController.class).buscarPorId(id)).withSelfRel());
+        dto.add(linkTo(methodOn(ProcessoController.class).alterar(dto)).withRel("update"));
+        dto.add(linkTo(methodOn(ProcessoController.class).excluir(id)).withRel("delete"));
+        dto.add(linkTo(methodOn(ProcessoController.class).inserir(dto)).withRel("create"));
+        return ResponseEntity.ok(dto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+        service.excluir(id);
+        return ResponseEntity.noContent().build();
+    }
+
+}

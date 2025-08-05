@@ -2,10 +2,12 @@ package br.com.attus.gerenciamentoprocessos.service.impl;
 
 import br.com.attus.gerenciamentoprocessos.exceptions.DuplicidadeDocumentoException;
 import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
+import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvidaDocumento;
 import br.com.attus.gerenciamentoprocessos.model.enums.TipoDocumento;
 import br.com.attus.gerenciamentoprocessos.repository.PartesEnvolvidasDocumentosRepository;
 import br.com.attus.gerenciamentoprocessos.repository.PartesEnvolvidasRepository;
 import br.com.attus.gerenciamentoprocessos.service.ParteEnvolvidaService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -14,14 +16,21 @@ import java.util.Optional;
 public class ParteEnvolvidaServiceImpl implements ParteEnvolvidaService {
 
     private final PartesEnvolvidasRepository partesEnvolvidasRepository;
+    private final PartesEnvolvidasDocumentosRepository partesEnvolvidasDocumentosRepository;
 
-    public ParteEnvolvidaServiceImpl(PartesEnvolvidasRepository partesEnvolvidasRepository, PartesEnvolvidasDocumentosRepository partesEnvolvidasDocumentosRepository) {
+    public ParteEnvolvidaServiceImpl(PartesEnvolvidasRepository partesEnvolvidasRepository, PartesEnvolvidasDocumentosRepository partesEnvolvidasDocumentosRepository, PartesEnvolvidasDocumentosRepository partesEnvolvidasDocumentosRepository1) {
         this.partesEnvolvidasRepository = partesEnvolvidasRepository;
+        this.partesEnvolvidasDocumentosRepository = partesEnvolvidasDocumentosRepository1;
     }
 
     @Override
     public ParteEnvolvida salvar(ParteEnvolvida parteEnvolvida) {
         String valorDoc = parteEnvolvida.getDocumento().getValor().replaceAll("\\D", "");
+        if (parteEnvolvida.getDocumento().getId() != null) {
+            ParteEnvolvidaDocumento documentoExistente = partesEnvolvidasDocumentosRepository.findById(parteEnvolvida.getDocumento().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Documento não encontrado"));
+            parteEnvolvida.setDocumento(documentoExistente);
+        }
         if (parteEnvolvida.getDocumento().getTipoDocumento() == TipoDocumento.CPF) {
             if (partesEnvolvidasRepository.existsByTipoParteEnvolvidaAndDocumento_ValorAndNomeCompleto(
                     parteEnvolvida.getTipoParteEnvolvida(),

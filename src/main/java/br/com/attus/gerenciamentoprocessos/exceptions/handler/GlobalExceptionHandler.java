@@ -3,6 +3,7 @@ package br.com.attus.gerenciamentoprocessos.exceptions.handler;
 
 import br.com.attus.gerenciamentoprocessos.exceptions.DuplicidadeDocumentoException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -44,6 +45,12 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Requisição mal formada.");
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(EntityNotFoundException.class)
+    public Map<String, String> handleEntityNotFoundException(EntityNotFoundException ex) {
+        return Map.of("mensagem", ex.getMessage());
     }
 
 }

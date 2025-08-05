@@ -3,14 +3,13 @@ package br.com.attus.gerenciamentoprocessos.dto;
 import br.com.attus.gerenciamentoprocessos.model.enums.TipoAndamentoProcessual;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.PastOrPresent;
+import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.time.LocalDate;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,6 +22,7 @@ public class AndamentoProcessualDto extends RepresentationModel<AndamentoProcess
     private TipoAndamentoProcessual tipoAndamentoProcessual;
 
     @NotNull(message = "A data de registro é obrigatória")
+    @PastOrPresent(message = "A data de abertura não pode ser no futuro")
     private LocalDate dataRegistro;
 
     @NotEmpty(message = "A descricao é obrigatória")
