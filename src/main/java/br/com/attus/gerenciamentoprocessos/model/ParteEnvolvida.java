@@ -3,7 +3,6 @@ package br.com.attus.gerenciamentoprocessos.model;
 import br.com.attus.gerenciamentoprocessos.model.enums.TipoParteEnvolvida;
 import jakarta.persistence.*;
 import lombok.*;
-import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.List;
 
@@ -14,8 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Getter
-@Setter
 public class ParteEnvolvida {
 
     @Id
@@ -27,7 +24,7 @@ public class ParteEnvolvida {
     private String nomeCompleto;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "tipo_parte_envolvida", nullable = false)
+    @Column(name = "tipo", nullable = false)
     private TipoParteEnvolvida tipoParteEnvolvida;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)

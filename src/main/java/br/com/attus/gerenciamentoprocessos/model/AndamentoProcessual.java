@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Data
-@Table(name = "andamento_processual")
+@Table(name = "andamentos_processuais")
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,7 +23,7 @@ public class AndamentoProcessual {
     private Long id;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "tipo_andamento_processual", nullable = false)
+    @Column(name = "tipo", nullable = false)
     private TipoAndamentoProcessual tipoAndamentoProcessual;
 
     @Column(name = "data_registro", nullable = false)

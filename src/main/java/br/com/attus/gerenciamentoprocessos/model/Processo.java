@@ -5,13 +5,12 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@Table(name = "processo")
+@Table(name = "processos")
 @Entity
 @AllArgsConstructor
 @Builder
@@ -30,7 +29,7 @@ public class Processo {
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
-            name = "processo_parte_envolvida",
+            name = "processos_partes_envolvidas",
             joinColumns = @JoinColumn(name = "processo_id"),
             inverseJoinColumns = @JoinColumn(name = "parte_envolvida_id")
     )

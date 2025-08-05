@@ -1,6 +1,5 @@
 package br.com.attus.gerenciamentoprocessos.model;
 
-import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
 import br.com.attus.gerenciamentoprocessos.model.enums.TipoDocumento;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Table(name = "parte_envolvida_documento")
+@Table(name = "partes_envolvidas_documentos")
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,7 +21,7 @@ public class ParteEnvolvidaDocumento {
     private Long id;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "tipo_documento", nullable = false)
+    @Column(name = "tipo", nullable = false)
     private TipoDocumento tipoDocumento;
 
     @Column(name = "valor", nullable = false)
