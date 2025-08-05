@@ -58,4 +58,10 @@ public class ProcessoController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}/arquivar")
+    public ResponseEntity<Void> arquivar(@PathVariable Long id) {
+        service.arquivarProcesso(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

@@ -12,4 +12,6 @@ public interface ProcessoService {
 
     void excluir(Long id);
 
+    void arquivarProcesso(Long id);
+
 }

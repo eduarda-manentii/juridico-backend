@@ -3,6 +3,7 @@ package br.com.attus.gerenciamentoprocessos.service.impl;
 import br.com.attus.gerenciamentoprocessos.model.AndamentoProcessual;
 import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
 import br.com.attus.gerenciamentoprocessos.model.Processo;
+import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
 import br.com.attus.gerenciamentoprocessos.repository.AndamentosProcessuaisRepository;
 import br.com.attus.gerenciamentoprocessos.repository.PartesEnvolvidasRepository;
 import br.com.attus.gerenciamentoprocessos.repository.ProcessosRepository;
@@ -62,6 +63,14 @@ public class ProcessoServiceImpl implements ProcessoService {
     @Override
     public void excluir(Long id) {
         this.processosRepository.deleteById(id);
+    }
+
+    @Override
+    public void arquivarProcesso(Long id) {
+        Processo processo = processosRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Processo com id " + id + " não encontrado"));
+        processo.setStatus(StatusProcesso.ARQUIVADO);
+        processosRepository.save(processo);
     }
 
 }
