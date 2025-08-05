@@ -23,7 +23,12 @@ public class Processo {
     @Column(name = "descricao_caso", nullable = false, length = 200)
     private String descricaoCaso;
 
-    @OneToMany(mappedBy = "processo", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "processo_parte_envolvida",
+            joinColumns = @JoinColumn(name = "processo_id"),
+            inverseJoinColumns = @JoinColumn(name = "parte_envolvida_id")
+    )
     private List<ParteEnvolvida> parteEnvolvida;
 
     @JoinColumn(name = "id_andamento_processual")

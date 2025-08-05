@@ -3,6 +3,9 @@ package br.com.attus.gerenciamentoprocessos.model;
 import br.com.attus.gerenciamentoprocessos.model.enums.TipoParteEnvolvida;
 import jakarta.persistence.*;
 import lombok.*;
+import org.antlr.v4.runtime.misc.NotNull;
+
+import java.util.List;
 
 
 @Data
@@ -27,14 +30,17 @@ public class ParteEnvolvida {
     @Column(name = "tipo_parte_envolvida", nullable = false)
     private TipoParteEnvolvida tipoParteEnvolvida;
 
-    @JoinColumn(name = "id_documentoo")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_documento")
     private ParteEnvolvidaDocumento documento;
 
     @Column(name = "email", nullable = false, length = 50)
     private String email;
 
     @Column(name = "telefone", nullable = false)
-    private int telefone;
+    private String telefone;
+
+    @ManyToMany(mappedBy = "parteEnvolvida")
+    private List<Processo> processos;
 
 }

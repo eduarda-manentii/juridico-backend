@@ -7,11 +7,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class ParteEnvolvidaMapper {
 
+    private final ParteEnvolvidaDocumentoMapper parteEnvolvidaDocumentoMapper;
+
+    public ParteEnvolvidaMapper(ParteEnvolvidaDocumentoMapper parteEnvolvidaDocumentoMapper) {
+        this.parteEnvolvidaDocumentoMapper = parteEnvolvidaDocumentoMapper;
+    }
+
     public ParteEnvolvidaDto toDto(ParteEnvolvida parteEnvolvida) {
         return ParteEnvolvidaDto.builder()
                 .id(parteEnvolvida.getId())
                 .nomeCompleto(parteEnvolvida.getNomeCompleto())
-                .documento(parteEnvolvida.getDocumento())
+                .documento(parteEnvolvidaDocumentoMapper.toDto(parteEnvolvida.getDocumento()))
                 .tipoParteEnvolvida(parteEnvolvida.getTipoParteEnvolvida())
                 .email(parteEnvolvida.getEmail())
                 .telefone(parteEnvolvida.getTelefone())
@@ -22,7 +28,7 @@ public class ParteEnvolvidaMapper {
         return ParteEnvolvida.builder()
                 .id(parteEnvolvidaDto.getId())
                 .nomeCompleto(parteEnvolvidaDto.getNomeCompleto())
-                .documento(parteEnvolvidaDto.getDocumento())
+                .documento(parteEnvolvidaDocumentoMapper.toEntity(parteEnvolvidaDto.getDocumento()))
                 .tipoParteEnvolvida(parteEnvolvidaDto.getTipoParteEnvolvida())
                 .email(parteEnvolvidaDto.getEmail())
                 .telefone(parteEnvolvidaDto.getTelefone())

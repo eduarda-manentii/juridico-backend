@@ -1,22 +1,36 @@
 package br.com.attus.gerenciamentoprocessos.dto;
 
-import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvidaDocumento;
 import br.com.attus.gerenciamentoprocessos.model.enums.TipoParteEnvolvida;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.springframework.hateoas.RepresentationModel;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Getter
-@Setter
-public class ParteEnvolvidaDto {
+public class ParteEnvolvidaDto extends RepresentationModel<ParteEnvolvidaDto> {
 
     private Long id;
+
+    @NotEmpty(message = "Nome completo é obrigatório")
     private String nomeCompleto;
+
+    @NotNull(message = "TipoParteEnvolvida é obrigatório")
     private TipoParteEnvolvida tipoParteEnvolvida;
-    private ParteEnvolvidaDocumento documento;
+
+    @Valid
+    @NotNull(message = "Documento é obrigatório")
+    private ParteEnvolvidaDocumentoDto documento;
+
+    @Email(message = "Email inválido")
+    @NotEmpty(message = "Email é obrigatório")
     private String email;
-    private int telefone;
+
+    @NotEmpty(message = "Telefone é obrigatório")
+    private String telefone;
 
 }

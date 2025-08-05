@@ -3,11 +3,17 @@ package br.com.attus.gerenciamentoprocessos.model;
 import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
 import br.com.attus.gerenciamentoprocessos.model.enums.TipoDocumento;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Table(name = "parte_envolvida_documento")
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class ParteEnvolvidaDocumento {
 
     @Id
