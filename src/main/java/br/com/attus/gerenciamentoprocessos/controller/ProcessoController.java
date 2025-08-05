@@ -3,10 +3,15 @@ package br.com.attus.gerenciamentoprocessos.controller;
 import br.com.attus.gerenciamentoprocessos.dto.ProcessoDto;
 import br.com.attus.gerenciamentoprocessos.mapper.ProcessoMapper;
 import br.com.attus.gerenciamentoprocessos.model.Processo;
+import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
 import br.com.attus.gerenciamentoprocessos.service.ProcessoService;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -62,6 +67,19 @@ public class ProcessoController {
     public ResponseEntity<Void> arquivar(@PathVariable Long id) {
         service.arquivarProcesso(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProcessoDto>> buscarPorFiltros(
+            @RequestParam(required = false) StatusProcesso status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataAbertura,
+            @RequestParam(required = false) String documento
+    ) {
+        List<Processo> processos = service.buscarPorFiltros(status, dataAbertura, documento);
+        List<ProcessoDto> dtos = processos.stream()
+                .map(mapper::toDto)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
 }

@@ -11,6 +11,7 @@ import br.com.attus.gerenciamentoprocessos.service.ProcessoService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -71,6 +72,11 @@ public class ProcessoServiceImpl implements ProcessoService {
                 .orElseThrow(() -> new EntityNotFoundException("Processo com id " + id + " não encontrado"));
         processo.setStatus(StatusProcesso.ARQUIVADO);
         processosRepository.save(processo);
+    }
+
+    @Override
+    public List<Processo> buscarPorFiltros(StatusProcesso status, LocalDate dataAbertura, String documento) {
+        return processosRepository.buscarPorFiltros(status, dataAbertura, documento);
     }
 
 }
