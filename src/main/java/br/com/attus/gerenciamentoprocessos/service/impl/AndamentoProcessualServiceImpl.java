@@ -3,6 +3,7 @@ package br.com.attus.gerenciamentoprocessos.service.impl;
 import br.com.attus.gerenciamentoprocessos.model.AndamentoProcessual;
 import br.com.attus.gerenciamentoprocessos.repository.AndamentosProcessuaisRepository;
 import br.com.attus.gerenciamentoprocessos.service.AndamentoProcessualService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -23,12 +24,8 @@ public class AndamentoProcessualServiceImpl implements AndamentoProcessualServic
 
     @Override
     public AndamentoProcessual buscarPorId(Long id) {
-        Optional<AndamentoProcessual> andamentoProcessualEncontrado = andamentosProcessuaisRepository.findById(id);
-        if(andamentoProcessualEncontrado.isPresent()) {
-            return andamentoProcessualEncontrado.get();
-        } else {
-            throw new NullPointerException("Não foi encontrado andamento processual para o id informado.");
-        }
+        return andamentosProcessuaisRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Andamento processual não encontrada para o ID informado."));
     }
 
     @Override
