@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-
 @RestController
 @RequestMapping("/partes-envolvidas")
 public class ParteEnvolvidaController {
@@ -57,6 +56,5 @@ public class ParteEnvolvidaController {
         service.excluir(id);
         return ResponseEntity.noContent().build();
     }
-
 
 }

@@ -1,4 +1,4 @@
-package br.com.attus.gerenciamentoprocessos.controller;
+package br.com.attus.gerenciamentoprocessos.exceptions.handler;
 
 
 import br.com.attus.gerenciamentoprocessos.exceptions.DuplicidadeDocumentoException;

@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,7 +20,7 @@ public class ParteEnvolvidaDto extends RepresentationModel<ParteEnvolvidaDto> {
     @NotEmpty(message = "Nome completo é obrigatório")
     private String nomeCompleto;
 
-    @NotNull(message = "TipoParteEnvolvida é obrigatório")
+    @NotNull(message = "O tipo da parte envolvida é obrigatório")
     private TipoParteEnvolvida tipoParteEnvolvida;
 
     @Valid

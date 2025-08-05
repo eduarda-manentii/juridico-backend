@@ -1,10 +1,7 @@
 package br.com.attus.gerenciamentoprocessos.mapper;
 
 import br.com.attus.gerenciamentoprocessos.dto.ParteEnvolvidaDocumentoDto;
-import br.com.attus.gerenciamentoprocessos.dto.ParteEnvolvidaDto;
-import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
 import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvidaDocumento;
-import jakarta.persistence.Column;
 import org.springframework.stereotype.Component;
 
 @Component
