@@ -38,9 +38,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST, "/usuarios/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/usuarios").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll() // 🔹 Libera todas as requisições
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -59,9 +57,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.addAllowedOrigin("https://juridico-frontend-production.up.railway.app");
-        corsConfig.addAllowedMethod("*");
-        corsConfig.addAllowedHeader("*");
+        corsConfig.addAllowedOriginPattern("*"); // 🔹 Aceita qualquer origem
+        corsConfig.addAllowedMethod("*");        // 🔹 Aceita todos os métodos
+        corsConfig.addAllowedHeader("*");        // 🔹 Aceita todos os headers
         corsConfig.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfig);
