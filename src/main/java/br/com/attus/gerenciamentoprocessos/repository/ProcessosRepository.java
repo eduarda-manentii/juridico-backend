@@ -2,6 +2,8 @@ package br.com.attus.gerenciamentoprocessos.repository;
 
 import br.com.attus.gerenciamentoprocessos.model.Processo;
 import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,10 +23,11 @@ public interface ProcessosRepository extends JpaRepository<Processo, Long> {
       AND (p.dataAbertura = :dataAbertura)
       AND (:documento IS NULL OR doc.valor = :documento)
     """)
-    List<Processo> buscarPorFiltros(
+    Page<Processo> buscarPorFiltros(
             @Param("status") StatusProcesso status,
             @Param("dataAbertura") LocalDate dataAbertura,
-            @Param("documento") String documento
+            @Param("documento") String documento,
+            @Param("pagincao") Pageable pagincao
     );
 
     boolean existsByAndamentoProcessual_Id(Long andamentoProcessualId);

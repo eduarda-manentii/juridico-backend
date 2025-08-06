@@ -9,6 +9,8 @@ import br.com.attus.gerenciamentoprocessos.repository.PartesEnvolvidasRepository
 import br.com.attus.gerenciamentoprocessos.repository.ProcessosRepository;
 import br.com.attus.gerenciamentoprocessos.service.ProcessoService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -71,8 +73,12 @@ public class ProcessoServiceImpl implements ProcessoService {
     }
 
     @Override
-    public List<Processo> buscarPorFiltros(StatusProcesso status, LocalDate dataAbertura, String documento) {
-        return processosRepository.buscarPorFiltros(status, dataAbertura, documento);
+    public Page<Processo> buscarPorFiltros(
+            StatusProcesso status,
+            LocalDate dataAbertura,
+            String documento,
+            Pageable pageable) {
+        return processosRepository.buscarPorFiltros(status, dataAbertura, documento, pageable);
     }
 
 }

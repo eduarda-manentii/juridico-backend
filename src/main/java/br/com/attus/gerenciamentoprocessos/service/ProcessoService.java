@@ -2,6 +2,8 @@ package br.com.attus.gerenciamentoprocessos.service;
 
 import br.com.attus.gerenciamentoprocessos.model.Processo;
 import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
@@ -18,6 +20,11 @@ public interface ProcessoService {
 
     void arquivarProcesso(Long id);
 
-    List<Processo> buscarPorFiltros(StatusProcesso status, LocalDate dataAbertura, String documento);
+    Page<Processo> buscarPorFiltros(
+            StatusProcesso status,
+            LocalDate dataAbertura,
+            String documento,
+            Pageable paginacao
+    );
 
 }

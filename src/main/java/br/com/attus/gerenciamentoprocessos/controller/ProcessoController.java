@@ -7,12 +7,16 @@ import br.com.attus.gerenciamentoprocessos.model.Processo;
 import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
 import br.com.attus.gerenciamentoprocessos.service.ProcessoService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -74,22 +78,22 @@ public class ProcessoController {
     }
 
     @GetMapping("/query")
-    public ResponseEntity<List<ProcessoDto>> buscarPorFiltros(
+    public ResponseEntity<Page<ProcessoDto>> buscarPorFiltros(
             @RequestParam(required = false) StatusProcesso status,
-            @RequestParam(required = false)  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataAbertura,
-            @RequestParam(required = false) String documento
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataAbertura,
+            @RequestParam(required = false) String documento,
+            @RequestParam(defaultValue = "0") int pagina
     ) {
-        System.out.println("dataAbertura: " + dataAbertura);
-        List<Processo> processos = service.buscarPorFiltros(status, dataAbertura, documento);
-        List<ProcessoDto> dtos = processos.stream()
-                .map(mapper::toDto)
-                .toList();
-        for (ProcessoDto dto : dtos) {
+        Pageable paginacao = PageRequest.of(pagina, 15);
+        Page<Processo> processos = service.buscarPorFiltros(status, dataAbertura, documento, paginacao);
+        Page<ProcessoDto> dtos = processos.map(processo -> {
+            ProcessoDto dto = mapper.toDto(processo);
             dto.add(linkTo(methodOn(ProcessoController.class).buscarPorId(dto.getId())).withSelfRel());
             dto.add(linkTo(methodOn(ProcessoController.class).alterar(dto)).withRel("update"));
             dto.add(linkTo(methodOn(ProcessoController.class).excluir(dto.getId())).withRel("delete"));
             dto.add(linkTo(methodOn(ProcessoController.class).inserir(dto)).withRel("create"));
-        }
+            return dto;
+        });
         return ResponseEntity.ok(dtos);
     }
 
