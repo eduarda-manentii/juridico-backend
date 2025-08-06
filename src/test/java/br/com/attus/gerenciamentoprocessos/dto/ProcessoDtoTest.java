@@ -60,25 +60,6 @@ class ProcessoDtoTest {
                 && v.getMessage().equals("É necessário informar pelo menos uma parte envolvida"));
     }
 
-
-    @Test
-    void deveValidarDataAberturaFuturo() {
-        ProcessoDto dto = ProcessoDto.builder()
-                .id(1L)
-                .dataAbertura(LocalDate.now().plusDays(1))
-                .descricaoCaso("Descrição válida")
-                .status(StatusProcesso.ATIVO)
-                .andamentoProcessual(new AndamentoProcessualDto())
-                .partesEnvolvidas(List.of(new ParteEnvolvidaDto()))
-                .build();
-
-        Set<ConstraintViolation<ProcessoDto>> violations = validator.validate(dto);
-
-        assertThat(violations).hasSize(1);
-        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("dataAbertura")
-                && v.getMessage().equals("A data de abertura não pode ser no futuro"));
-    }
-
     @Test
     void deveValidarListaPartesEnvolvidasVazia() {
         ProcessoDto dto = ProcessoDto.builder()

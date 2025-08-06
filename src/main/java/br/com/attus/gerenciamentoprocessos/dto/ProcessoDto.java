@@ -20,7 +20,6 @@ public class ProcessoDto extends RepresentationModel<ProcessoDto> {
     private Long id;
 
     @NotNull(message = "Data de abertura é obrigatória")
-    @PastOrPresent(message = "A data de abertura não pode ser no futuro")
     private LocalDate dataAbertura;
 
     @NotEmpty(message = "Descrição do caso é obrigatória")
