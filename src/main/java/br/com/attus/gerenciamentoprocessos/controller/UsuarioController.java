@@ -4,8 +4,6 @@ import br.com.attus.gerenciamentoprocessos.dto.*;
 import br.com.attus.gerenciamentoprocessos.exceptions.EntidadeEmUsoException;
 import br.com.attus.gerenciamentoprocessos.exceptions.ObrigatoriedadeIdException;
 import br.com.attus.gerenciamentoprocessos.mapper.UsuarioMapper;
-import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
-import br.com.attus.gerenciamentoprocessos.model.Processo;
 import br.com.attus.gerenciamentoprocessos.model.Usuario;
 import br.com.attus.gerenciamentoprocessos.security.TokenService;
 import br.com.attus.gerenciamentoprocessos.service.UsuarioService;
@@ -41,19 +39,19 @@ public class UsuarioController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseDTO> login(@RequestBody LoginRequestDTO body){
+    public ResponseEntity<ResponseDto> login(@RequestBody LoginRequestDto body){
         Optional<Usuario> usuario = service.buscarPorEmail(body.email());
         if(usuario.isPresent()){
             if(passwordEncoder.matches(body.senha(), usuario.get().getSenha())) {
                 String token = this.tokenService.generateToken(usuario.get());
-                return ResponseEntity.ok(new ResponseDTO(usuario.get().getNome(), token));
+                return ResponseEntity.ok(new ResponseDto(usuario.get().getNome(), token));
             }
         }
         return ResponseEntity.badRequest().build();
     }
 
     @PostMapping
-    public ResponseEntity<ResponseDTO> inserir(@RequestBody UsuarioDto dto){
+    public ResponseEntity<ResponseDto> inserir(@RequestBody UsuarioDto dto){
         Optional<Usuario> usuario = service.buscarPorEmail(dto.getEmail());
         if(usuario.isEmpty()) {
             Usuario novoUsuario = new Usuario();
@@ -62,7 +60,7 @@ public class UsuarioController {
             novoUsuario.setNome(dto.getNome());
             this.service.salvar(novoUsuario);
             String token = this.tokenService.generateToken(novoUsuario);
-            return ResponseEntity.ok(new ResponseDTO(novoUsuario.getNome(), token));
+            return ResponseEntity.ok(new ResponseDto(novoUsuario.getNome(), token));
         } else {
             throw new EntidadeEmUsoException("Usuário já existente");
         }

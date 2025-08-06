@@ -73,10 +73,10 @@ public class ProcessoController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping
+    @GetMapping("/query")
     public ResponseEntity<List<ProcessoDto>> buscarPorFiltros(
             @RequestParam(required = false) StatusProcesso status,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataAbertura,
+            @RequestParam(required = false)  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataAbertura,
             @RequestParam(required = false) String documento
     ) {
         List<Processo> processos = service.buscarPorFiltros(status, dataAbertura, documento);
