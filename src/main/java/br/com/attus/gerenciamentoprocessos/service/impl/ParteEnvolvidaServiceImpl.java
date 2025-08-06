@@ -10,6 +10,8 @@ import br.com.attus.gerenciamentoprocessos.repository.PartesEnvolvidasRepository
 import br.com.attus.gerenciamentoprocessos.repository.ProcessosRepository;
 import br.com.attus.gerenciamentoprocessos.service.ParteEnvolvidaService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -64,6 +66,9 @@ public class ParteEnvolvidaServiceImpl implements ParteEnvolvidaService {
         return partesEnvolvidasRepository.findAllById(ids);
     }
 
+    public Page<ParteEnvolvida> listarTodos(Pageable pageable) {
+        return partesEnvolvidasRepository.findAll(pageable);
+    }
 
     private void normalizarCampos(ParteEnvolvida parteEnvolvida) {
         String telefoneLimpo = parteEnvolvida.getTelefone().replaceAll("\\D", "");

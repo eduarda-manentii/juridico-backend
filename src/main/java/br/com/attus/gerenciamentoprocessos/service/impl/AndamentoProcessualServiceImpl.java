@@ -6,6 +6,8 @@ import br.com.attus.gerenciamentoprocessos.repository.AndamentosProcessuaisRepos
 import br.com.attus.gerenciamentoprocessos.repository.ProcessosRepository;
 import br.com.attus.gerenciamentoprocessos.service.AndamentoProcessualService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,4 +43,10 @@ public class AndamentoProcessualServiceImpl implements AndamentoProcessualServic
         }
         andamentosProcessuaisRepository.deleteById(id);
     }
+
+    @Override
+    public Page<AndamentoProcessual> listarTodos(Pageable pageable) {
+        return andamentosProcessuaisRepository.findAll(pageable);
+    }
+
 }

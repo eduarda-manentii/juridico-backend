@@ -1,13 +1,16 @@
 package br.com.attus.gerenciamentoprocessos.controller;
 
+import br.com.attus.gerenciamentoprocessos.dto.ParteEnvolvidaDto;
 import br.com.attus.gerenciamentoprocessos.dto.ProcessoDto;
 import br.com.attus.gerenciamentoprocessos.exceptions.ObrigatoriedadeIdException;
 import br.com.attus.gerenciamentoprocessos.mapper.ProcessoMapper;
+import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
 import br.com.attus.gerenciamentoprocessos.model.Processo;
 import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
 import br.com.attus.gerenciamentoprocessos.service.ProcessoService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -95,6 +99,28 @@ public class ProcessoController {
             return dto;
         });
         return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<ProcessoDto>> listarTodos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Processo> pageEntidades = service.listarTodos(pageable);
+
+        var dtos = pageEntidades.stream()
+                .map(entidade -> {
+                    ProcessoDto dto = mapper.toDto(entidade);
+                    dto.add(linkTo(methodOn(ProcessoController.class).buscarPorId(entidade.getId())).withSelfRel());
+                    dto.add(linkTo(methodOn(ProcessoController.class).alterar(dto)).withRel("update"));
+                    dto.add(linkTo(methodOn(ProcessoController.class).excluir(entidade.getId())).withRel("delete"));
+                    dto.add(linkTo(methodOn(ProcessoController.class).inserir(dto)).withRel("create"));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        Page<ProcessoDto> pageDto = new PageImpl<>(dtos, pageable, pageEntidades.getTotalElements());
+        return ResponseEntity.ok(pageDto);
     }
 
 }

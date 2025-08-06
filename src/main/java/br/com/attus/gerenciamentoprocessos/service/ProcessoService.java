@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Validated
 public interface ProcessoService {
@@ -26,6 +25,8 @@ public interface ProcessoService {
             String documento,
             Pageable paginacao
     );
+
+    Page<Processo> listarTodos(Pageable pageable);
 
     boolean existsByAndamentoProcessual_Id(Long id);
 }

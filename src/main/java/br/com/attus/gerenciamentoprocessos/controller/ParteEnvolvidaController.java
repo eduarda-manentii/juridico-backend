@@ -6,8 +6,14 @@ import br.com.attus.gerenciamentoprocessos.mapper.ParteEnvolvidaMapper;
 import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
 import br.com.attus.gerenciamentoprocessos.service.ParteEnvolvidaService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
@@ -59,6 +65,28 @@ public class ParteEnvolvidaController {
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
         service.excluir(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<ParteEnvolvidaDto>> listarTodos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ParteEnvolvida> pageEntidades = service.listarTodos(pageable);
+
+        var dtos = pageEntidades.stream()
+                .map(entidade -> {
+                    ParteEnvolvidaDto dto = parteEnvolvidaMapper.toDto(entidade);
+                    dto.add(linkTo(methodOn(ParteEnvolvidaController.class).buscarPorId(entidade.getId())).withSelfRel());
+                    dto.add(linkTo(methodOn(ParteEnvolvidaController.class).alterar(dto)).withRel("update"));
+                    dto.add(linkTo(methodOn(ParteEnvolvidaController.class).excluir(entidade.getId())).withRel("delete"));
+                    dto.add(linkTo(methodOn(ParteEnvolvidaController.class).inserir(dto)).withRel("create"));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        Page<ParteEnvolvidaDto> pageDto = new PageImpl<>(dtos, pageable, pageEntidades.getTotalElements());
+        return ResponseEntity.ok(pageDto);
     }
 
 }

@@ -92,4 +92,9 @@ public class ProcessoServiceImpl implements ProcessoService {
         return processosRepository.existsByAndamentoProcessual_Id(id);
     }
 
+    @Override
+    public Page<Processo> listarTodos(Pageable pageable) {
+        return processosRepository.findAll(pageable);
+    }
+
 }
