@@ -1,5 +1,6 @@
 package br.com.attus.gerenciamentoprocessos.service.impl;
 
+import br.com.attus.gerenciamentoprocessos.exceptions.EntidadeEmUsoException;
 import br.com.attus.gerenciamentoprocessos.model.Usuario;
 import br.com.attus.gerenciamentoprocessos.repository.UsuariosRepository;
 import br.com.attus.gerenciamentoprocessos.service.UsuarioService;
@@ -19,6 +20,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public Usuario salvar(Usuario usuario) {
+        Optional<Usuario> existente = usuariosRepository.findByNomeAndEmail(usuario.getNome(), usuario.getEmail());
+        if (existente.isPresent() && (usuario.getId() == null || !existente.get().getId().equals(usuario.getId()))) {
+                throw new EntidadeEmUsoException("Já existe um usuário com as credenciais informadas.");
+            }
         return usuariosRepository.save(usuario);
     }
 

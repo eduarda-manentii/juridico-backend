@@ -1,6 +1,7 @@
 package br.com.attus.gerenciamentoprocessos.service.impl;
 
 
+import br.com.attus.gerenciamentoprocessos.exceptions.EntidadeEmUsoException;
 import br.com.attus.gerenciamentoprocessos.model.Usuario;
 import br.com.attus.gerenciamentoprocessos.repository.UsuariosRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -92,6 +93,28 @@ class UsuarioServiceImplTest {
         Optional<Usuario> resultado = usuarioService.buscarPorEmail("inexistente@example.com");
 
         assertFalse(resultado.isPresent());
+    }
+
+    @Test
+    void deveLancarExcecaoAoSalvarUsuarioComNomeEEmailJaExistentes_emAlteracaoDeOutroUsuario() {
+        Usuario usuario = Usuario.builder()
+                .id(2L)
+                .nome("João")
+                .email("joao@email.com")
+                .senha("novaSenha")
+                .build();
+
+        Usuario existente = Usuario.builder()
+                .id(1L)
+                .nome("João")
+                .email("joao@email.com")
+                .senha("senha")
+                .build();
+
+        when(usuariosRepository.findByNomeAndEmail("João", "joao@email.com"))
+                .thenReturn(Optional.of(existente));
+        assertThrows(EntidadeEmUsoException.class, () -> usuarioService.salvar(usuario));
+        verify(usuariosRepository, never()).save(any());
     }
 
 }
