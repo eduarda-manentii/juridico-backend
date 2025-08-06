@@ -35,8 +35,8 @@ public class ProcessoMapper {
                 .id(processo.getId())
                 .dataAbertura(processo.getDataAbertura())
                 .descricaoCaso(processo.getDescricaoCaso())
-                .partesEnvolvidasDtos(lista)
-                .andamentoProcessualDtos(andamentoProcessualMapper.toDto(processo.getAndamentoProcessual()))
+                .partesEnvolvidas(lista)
+                .andamentoProcessual(andamentoProcessualMapper.toDto(processo.getAndamentoProcessual()))
                 .status(processo.getStatus())
                 .build();
     }
@@ -46,11 +46,11 @@ public class ProcessoMapper {
                 .id(processoDto.getId())
                 .dataAbertura(processoDto.getDataAbertura())
                 .descricaoCaso(processoDto.getDescricaoCaso())
-                .partesEnvolvidas(processoDto.getPartesEnvolvidasDtos()
+                .partesEnvolvidas(processoDto.getPartesEnvolvidas()
                         .stream()
                         .map(parteEnvolvidaMapper::toEntity)
                         .collect(Collectors.toList()))
-                .andamentoProcessual(andamentoProcessualMapper.toEntity(processoDto.getAndamentoProcessualDtos()))
+                .andamentoProcessual(andamentoProcessualMapper.toEntity(processoDto.getAndamentoProcessual()))
                 .status(processoDto.getStatus())
                 .build();
     }

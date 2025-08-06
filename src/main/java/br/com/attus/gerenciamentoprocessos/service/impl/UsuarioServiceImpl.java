@@ -1,6 +1,5 @@
 package br.com.attus.gerenciamentoprocessos.service.impl;
 
-import br.com.attus.gerenciamentoprocessos.model.AndamentoProcessual;
 import br.com.attus.gerenciamentoprocessos.model.Usuario;
 import br.com.attus.gerenciamentoprocessos.repository.UsuariosRepository;
 import br.com.attus.gerenciamentoprocessos.service.UsuarioService;

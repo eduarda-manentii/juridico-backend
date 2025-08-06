@@ -27,4 +27,5 @@ public interface ProcessoService {
             Pageable paginacao
     );
 
+    boolean existsByAndamentoProcessual_Id(Long id);
 }

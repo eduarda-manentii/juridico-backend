@@ -40,13 +40,11 @@ public class UsuarioController {
 
     @PostMapping("/login")
     public ResponseEntity<ResponseDto> login(@RequestBody LoginRequestDto body){
-        Optional<Usuario> usuario = service.buscarPorEmail(body.email());
-        if(usuario.isPresent()){
-            if(passwordEncoder.matches(body.senha(), usuario.get().getSenha())) {
+        Optional<Usuario> usuario = service.buscarPorEmail(body.getEmail());
+        if(usuario.isPresent() && passwordEncoder.matches(body.getSenha(), usuario.get().getSenha())) {
                 String token = this.tokenService.generateToken(usuario.get());
-                return ResponseEntity.ok(new ResponseDto(usuario.get().getNome(), token));
+                return ResponseEntity.ok(new ResponseDto(usuario.get().getId(), usuario.get().getNome(), token));
             }
-        }
         return ResponseEntity.badRequest().build();
     }
 
@@ -60,7 +58,7 @@ public class UsuarioController {
             novoUsuario.setNome(dto.getNome());
             this.service.salvar(novoUsuario);
             String token = this.tokenService.generateToken(novoUsuario);
-            return ResponseEntity.ok(new ResponseDto(novoUsuario.getNome(), token));
+            return ResponseEntity.ok(new ResponseDto(novoUsuario.getId(), novoUsuario.getNome(), token));
         } else {
             throw new EntidadeEmUsoException("Usuário já existente");
         }

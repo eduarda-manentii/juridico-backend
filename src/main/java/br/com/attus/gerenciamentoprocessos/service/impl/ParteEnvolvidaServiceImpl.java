@@ -13,7 +13,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ParteEnvolvidaServiceImpl implements ParteEnvolvidaService {
@@ -59,6 +58,12 @@ public class ParteEnvolvidaServiceImpl implements ParteEnvolvidaService {
         }
         partesEnvolvidasRepository.deleteById(id);
     }
+
+    @Override
+    public List<ParteEnvolvida> listarPorIds(List<Long> ids) {
+        return partesEnvolvidasRepository.findAllById(ids);
+    }
+
 
     private void normalizarCampos(ParteEnvolvida parteEnvolvida) {
         String telefoneLimpo = parteEnvolvida.getTelefone().replaceAll("\\D", "");

@@ -1,8 +1,6 @@
 package br.com.attus.gerenciamentoprocessos.mapper;
 
-import br.com.attus.gerenciamentoprocessos.dto.AndamentoProcessualDto;
 import br.com.attus.gerenciamentoprocessos.dto.UsuarioDto;
-import br.com.attus.gerenciamentoprocessos.model.AndamentoProcessual;
 import br.com.attus.gerenciamentoprocessos.model.Usuario;
 import org.springframework.stereotype.Component;
 
