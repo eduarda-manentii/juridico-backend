@@ -22,7 +22,6 @@ public class AndamentoProcessualDto extends RepresentationModel<AndamentoProcess
     private TipoAndamentoProcessual tipoAndamentoProcessual;
 
     @NotNull(message = "A data de registro é obrigatória")
-    @PastOrPresent(message = "A data de abertura não pode ser no futuro")
     private LocalDate dataRegistro;
 
     @NotEmpty(message = "A descricao é obrigatória")

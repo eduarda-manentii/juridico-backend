@@ -48,23 +48,6 @@ class AndamentoProcessualDtoTest {
     }
 
     @Test
-    void deveValidarDataRegistroFuturo() {
-        AndamentoProcessualDto dto = AndamentoProcessualDto.builder()
-                .id(1L)
-                .tipoAndamentoProcessual(TipoAndamentoProcessual.AUDIENCIA)
-                .dataRegistro(LocalDate.now().plusDays(1))
-                .descricao("Descrição válida")
-                .build();
-
-        Set<ConstraintViolation<AndamentoProcessualDto>> violations = validator.validate(dto);
-
-        assertThat(violations).hasSize(1);
-
-        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("dataRegistro")
-                && v.getMessage().equals("A data de abertura não pode ser no futuro"));
-    }
-
-    @Test
     void deveCriarDtoValido() {
         AndamentoProcessualDto dto = AndamentoProcessualDto.builder()
                 .id(1L)
