@@ -12,7 +12,7 @@ public class CorsConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.addAllowedOrigin("http://localhost:4200");
+        corsConfig.addAllowedOrigin("https://juridico-frontend-production.up.railway.app/login");
         corsConfig.addAllowedMethod("GET");
         corsConfig.addAllowedMethod("POST");
         corsConfig.addAllowedMethod("DELETE");
