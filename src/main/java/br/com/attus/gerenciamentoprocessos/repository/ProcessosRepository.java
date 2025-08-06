@@ -15,7 +15,7 @@ public interface ProcessosRepository extends JpaRepository<Processo, Long> {
 
     @Query("""
     SELECT DISTINCT p FROM Processo p
-    JOIN p.parteEnvolvida parte
+    JOIN p.partesEnvolvidas parte
     JOIN parte.documento doc
     WHERE (:status IS NULL OR p.status = :status)
       AND (:dataAbertura IS NULL OR p.dataAbertura = :dataAbertura)
@@ -29,6 +29,6 @@ public interface ProcessosRepository extends JpaRepository<Processo, Long> {
 
     boolean existsByAndamentoProcessual_Id(Long andamentoProcessualId);
 
-    boolean existsByParteEnvolvida_Id(Long parteEnvolvidaId);
+    boolean existsByPartesEnvolvidas_Id(Long parteEnvolvidaId);
 
 }

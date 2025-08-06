@@ -83,6 +83,12 @@ public class ProcessoController {
         List<ProcessoDto> dtos = processos.stream()
                 .map(mapper::toDto)
                 .toList();
+        for (ProcessoDto dto : dtos) {
+            dto.add(linkTo(methodOn(ProcessoController.class).buscarPorId(dto.getId())).withSelfRel());
+            dto.add(linkTo(methodOn(ProcessoController.class).alterar(dto)).withRel("update"));
+            dto.add(linkTo(methodOn(ProcessoController.class).excluir(dto.getId())).withRel("delete"));
+            dto.add(linkTo(methodOn(ProcessoController.class).inserir(dto)).withRel("create"));
+        }
         return ResponseEntity.ok(dtos);
     }
 

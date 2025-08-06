@@ -53,9 +53,9 @@ public class ParteEnvolvidaServiceImpl implements ParteEnvolvidaService {
 
     @Override
     public void excluir(Long id) {
-        boolean existeEmProcesso = processosRepository.existsByAndamentoProcessual_Id(id);
+        boolean existeEmProcesso = processosRepository.existsByPartesEnvolvidas_Id(id);
         if (existeEmProcesso) {
-            throw new EntidadeEmUsoException("Não é possível excluir. Esta parte envolvida está vinculado a um processo.");
+            throw new EntidadeEmUsoException("Não é possível excluir. Esta parte está envolvida com um processo.");
         }
         partesEnvolvidasRepository.deleteById(id);
     }

@@ -33,7 +33,7 @@ public class Processo {
             joinColumns = @JoinColumn(name = "processo_id"),
             inverseJoinColumns = @JoinColumn(name = "parte_envolvida_id")
     )
-    private List<ParteEnvolvida> parteEnvolvida;
+    private List<ParteEnvolvida> partesEnvolvidas;
 
     @JoinColumn(name = "id_andamento_processual")
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

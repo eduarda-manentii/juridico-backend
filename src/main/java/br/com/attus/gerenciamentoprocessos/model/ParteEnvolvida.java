@@ -37,7 +37,7 @@ public class ParteEnvolvida {
     @Column(name = "telefone", nullable = false)
     private String telefone;
 
-    @ManyToMany(mappedBy = "parteEnvolvida")
+    @ManyToMany(mappedBy = "partesEnvolvidas")
     private List<Processo> processos;
 
 }

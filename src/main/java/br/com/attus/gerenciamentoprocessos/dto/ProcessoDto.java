@@ -1,5 +1,7 @@
 package br.com.attus.gerenciamentoprocessos.dto;
 
+import br.com.attus.gerenciamentoprocessos.model.AndamentoProcessual;
+import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
 import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -30,9 +32,9 @@ public class ProcessoDto extends RepresentationModel<ProcessoDto> {
     private StatusProcesso status;
 
     @NotNull(message = "Andamento processual é obrigatório")
-    private Long andamentoProcessualId;
+    private AndamentoProcessualDto andamentoProcessualDtos;
 
     @NotEmpty(message = "É necessário informar pelo menos uma parte envolvida")
-    private List<Long> parteEnvolvidaIds;
+    private List<ParteEnvolvidaDto> partesEnvolvidasDtos;
 
 }

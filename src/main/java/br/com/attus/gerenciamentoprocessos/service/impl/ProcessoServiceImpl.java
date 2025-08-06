@@ -38,15 +38,15 @@ public class ProcessoServiceImpl implements ProcessoService {
                             "AndamentoProcessual com id " + andamentoId + " não encontrado"));
             processo.setAndamentoProcessual(andamento);
         }
-        if (processo.getParteEnvolvida() != null && !processo.getParteEnvolvida().isEmpty()) {
-            List<Long> ids = processo.getParteEnvolvida().stream()
+        if (processo.getPartesEnvolvidas() != null && !processo.getPartesEnvolvidas().isEmpty()) {
+            List<Long> ids = processo.getPartesEnvolvidas().stream()
                     .map(ParteEnvolvida::getId)
                     .toList();
             List<ParteEnvolvida> partesGerenciadas = partesEnvolvidasRepository.findAllById(ids);
             if (partesGerenciadas.size() != ids.size()) {
                 throw new EntityNotFoundException("Uma ou mais partes envolvidas não foram encontradas para os IDs informados.");
             }
-            processo.setParteEnvolvida(partesGerenciadas);
+            processo.setPartesEnvolvidas(partesGerenciadas);
         }
         return processosRepository.save(processo);
     }
