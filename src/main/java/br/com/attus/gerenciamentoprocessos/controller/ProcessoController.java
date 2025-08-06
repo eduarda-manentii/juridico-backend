@@ -79,6 +79,7 @@ public class ProcessoController {
             @RequestParam(required = false)  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataAbertura,
             @RequestParam(required = false) String documento
     ) {
+        System.out.println("dataAbertura: " + dataAbertura);
         List<Processo> processos = service.buscarPorFiltros(status, dataAbertura, documento);
         List<ProcessoDto> dtos = processos.stream()
                 .map(mapper::toDto)

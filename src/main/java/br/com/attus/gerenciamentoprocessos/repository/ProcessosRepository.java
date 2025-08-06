@@ -18,7 +18,7 @@ public interface ProcessosRepository extends JpaRepository<Processo, Long> {
     JOIN p.partesEnvolvidas parte
     JOIN parte.documento doc
     WHERE (:status IS NULL OR p.status = :status)
-      AND (:dataAbertura IS NULL OR p.dataAbertura = :dataAbertura)
+      AND (p.dataAbertura = :dataAbertura)
       AND (:documento IS NULL OR doc.valor = :documento)
     """)
     List<Processo> buscarPorFiltros(
