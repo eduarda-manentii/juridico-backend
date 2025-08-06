@@ -4,9 +4,9 @@ import br.com.attus.gerenciamentoprocessos.model.AndamentoProcessual;
 import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
 import br.com.attus.gerenciamentoprocessos.model.Processo;
 import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
+import br.com.attus.gerenciamentoprocessos.repository.AndamentosProcessuaisRepository;
+import br.com.attus.gerenciamentoprocessos.repository.PartesEnvolvidasRepository;
 import br.com.attus.gerenciamentoprocessos.repository.ProcessosRepository;
-import br.com.attus.gerenciamentoprocessos.service.AndamentoProcessualService;
-import br.com.attus.gerenciamentoprocessos.service.ParteEnvolvidaService;
 import br.com.attus.gerenciamentoprocessos.service.ProcessoService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
@@ -15,35 +15,42 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProcessoServiceImpl implements ProcessoService {
 
     private final ProcessosRepository  processosRepository;
-    private final AndamentoProcessualService andamentosProcessuaisService;
-    private final ParteEnvolvidaService parteEnvolvidaService;
+
+    private final AndamentosProcessuaisRepository andamentosProcessuaisRepository;
+
+    private final PartesEnvolvidasRepository partesEnvolvidasRepository;
 
     public ProcessoServiceImpl(
             ProcessosRepository processosRepository,
-            AndamentoProcessualService andamentosProcessuaisService,
-            ParteEnvolvidaService parteEnvolvidaService) {
+            AndamentosProcessuaisRepository andamentosProcessuaisRepository,
+            PartesEnvolvidasRepository partesEnvolvidasRepository) {
         this.processosRepository = processosRepository;
-        this.andamentosProcessuaisService = andamentosProcessuaisService;
-        this.parteEnvolvidaService = parteEnvolvidaService;
+        this.andamentosProcessuaisRepository = andamentosProcessuaisRepository;
+        this.partesEnvolvidasRepository = partesEnvolvidasRepository;
     }
 
     @Override
     public Processo salvar(Processo processo) {
         if (processo.getAndamentoProcessual() != null && processo.getAndamentoProcessual().getId() != null) {
             Long andamentoId = processo.getAndamentoProcessual().getId();
-            AndamentoProcessual andamento = andamentosProcessuaisService.buscarPorId(andamentoId);
-            processo.setAndamentoProcessual(andamento);
+            Optional<AndamentoProcessual> andamento = andamentosProcessuaisRepository.findById(andamentoId);
+            if (andamento.isPresent()) {
+                processo.setAndamentoProcessual(andamento.get());
+            } else {
+                throw new EntityNotFoundException("Andamento não encontrado para o id informado.");
+            }
         }
         if (processo.getPartesEnvolvidas() != null && !processo.getPartesEnvolvidas().isEmpty()) {
             List<Long> ids = processo.getPartesEnvolvidas().stream()
                     .map(ParteEnvolvida::getId)
                     .toList();
-            List<ParteEnvolvida> partesGerenciadas = parteEnvolvidaService.listarPorIds(ids);
+            List<ParteEnvolvida> partesGerenciadas = partesEnvolvidasRepository.findAllById(ids);
             if (partesGerenciadas.size() != ids.size()) {
                 throw new EntityNotFoundException("Uma ou mais partes envolvidas não foram encontradas para os IDs informados.");
             }
