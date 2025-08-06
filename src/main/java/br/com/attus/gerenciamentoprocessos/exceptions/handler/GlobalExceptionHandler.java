@@ -4,6 +4,7 @@ package br.com.attus.gerenciamentoprocessos.exceptions.handler;
 import br.com.attus.gerenciamentoprocessos.exceptions.DuplicidadeDocumentoException;
 import br.com.attus.gerenciamentoprocessos.exceptions.EntidadeEmUsoException;
 import br.com.attus.gerenciamentoprocessos.exceptions.ObrigatoriedadeIdException;
+import br.com.attus.gerenciamentoprocessos.exceptions.TokenInvalidoException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,12 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(TokenInvalidoException.class)
+    public ResponseEntity<String> handleTokenInvalidoException(TokenInvalidoException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("Token inválido ou expirado.");
+    }
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(DuplicidadeDocumentoException.class)
