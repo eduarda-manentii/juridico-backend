@@ -6,22 +6,30 @@ import br.com.attus.gerenciamentoprocessos.model.Processo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@SpringBootTest
 class ProcessoMapperTest {
 
+    @Autowired
     private Mocker mocker;
+
+    @Autowired
     private ProcessoMapper processoMapper;
+
     private ParteEnvolvidaMapper parteEnvolvidaMapper;
+
     private AndamentoProcessualMapper andamentoProcessualMapper;
 
     @BeforeEach
     void setUp() {
-        mocker = new Mocker();
         parteEnvolvidaMapper = mock(ParteEnvolvidaMapper.class);
         andamentoProcessualMapper = mock(AndamentoProcessualMapper.class);
         when(parteEnvolvidaMapper.toDto(any())).thenAnswer(invocation -> {

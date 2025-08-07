@@ -8,15 +8,14 @@ import br.com.attus.gerenciamentoprocessos.model.enums.TipoDocumento;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest
 class ParteEnvolvidaDocumentoMapperTest {
 
+    @Autowired
     private ParteEnvolvidaDocumentoMapper mapper;
-
-    @BeforeEach
-    void setup() {
-        mapper = new ParteEnvolvidaDocumentoMapper();
-    }
 
     @Nested
     class Dado_um_documento {

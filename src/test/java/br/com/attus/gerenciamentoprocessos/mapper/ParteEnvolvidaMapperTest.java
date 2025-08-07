@@ -1,6 +1,5 @@
 package br.com.attus.gerenciamentoprocessos.mapper;
 
-import br.com.attus.gerenciamentoprocessos.Mocker;
 import br.com.attus.gerenciamentoprocessos.dto.ParteEnvolvidaDocumentoDto;
 import br.com.attus.gerenciamentoprocessos.dto.ParteEnvolvidaDto;
 import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
@@ -10,19 +9,16 @@ import br.com.attus.gerenciamentoprocessos.model.enums.TipoParteEnvolvida;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 class ParteEnvolvidaMapperTest {
 
+    @Autowired
     private ParteEnvolvidaMapper mapper;
-    private Mocker mocker;
-
-    @BeforeEach
-    void setUp() {
-        mapper = new ParteEnvolvidaMapper(new ParteEnvolvidaDocumentoMapper());
-        mocker = new Mocker();
-    }
 
     @Nested
     class Dada_uma_parte_envolvida {

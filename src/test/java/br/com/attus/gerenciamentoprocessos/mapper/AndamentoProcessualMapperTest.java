@@ -8,17 +8,16 @@ import br.com.attus.gerenciamentoprocessos.model.enums.TipoAndamentoProcessual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 
+@SpringBootTest
 class AndamentoProcessualMapperTest {
 
+    @Autowired
     private AndamentoProcessualMapper mapper;
-
-    @BeforeEach
-    void setUp() {
-        mapper = new AndamentoProcessualMapper();
-    }
 
     @Nested
     class Dado_um_andamento_processual {
