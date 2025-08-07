@@ -3,11 +3,14 @@ package br.com.attus.gerenciamentoprocessos.service.impl;
 import br.com.attus.gerenciamentoprocessos.Mocker;
 import br.com.attus.gerenciamentoprocessos.exceptions.EntidadeEmUsoException;
 import br.com.attus.gerenciamentoprocessos.model.Usuario;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -96,6 +99,52 @@ class UsuarioServiceImplTest {
                     assertNotNull(usuarioNovo.getId());
                     assertNotEquals(usuarioSalvo.getId(), usuarioNovo.getId());
                     assertEquals("emailDiferente@gmail.com", usuarioNovo.getEmail());
+                }
+            }
+
+            @Nested
+            class Quando_buscar_por_id {
+
+                @Test
+                void Entao_deve_retornar_usuario_corretamente() {
+                    Usuario encontrado = usuarioService.buscarPorId(usuarioSalvo.getId());
+                    assertNotNull(encontrado);
+                    assertEquals(usuarioSalvo.getId(), encontrado.getId());
+                }
+
+                @Test
+                void Entao_deve_lancar_excecao_quando_nao_encontrar() {
+                    Long idInexistente = 999999L;
+                    assertThrows(EntityNotFoundException.class,
+                            () -> usuarioService.buscarPorId(idInexistente));
+                }
+            }
+
+            @Nested
+            class Quando_buscar_por_email {
+
+                @Test
+                void Entao_deve_retornar_usuario_corretamente() {
+                    Optional<Usuario> encontrado = usuarioService.buscarPorEmail(usuarioSalvo.getEmail());
+                    assertTrue(encontrado.isPresent());
+                    assertEquals(usuarioSalvo.getId(), encontrado.get().getId());
+                }
+
+                @Test
+                void Entao_nao_deve_retornar_usuario_para_email_inexistente() {
+                    Optional<Usuario> encontrado = usuarioService.buscarPorEmail("naoexiste@email.com");
+                    assertTrue(encontrado.isEmpty());
+                }
+            }
+
+            @Nested
+            class Quando_excluir_usuario {
+
+                @Test
+                void Entao_deve_excluir_com_sucesso() {
+                    assertDoesNotThrow(() -> usuarioService.excluir(usuarioSalvo.getId()));
+                    assertThrows(EntityNotFoundException.class,
+                            () -> usuarioService.buscarPorId(usuarioSalvo.getId()));
                 }
             }
         }
