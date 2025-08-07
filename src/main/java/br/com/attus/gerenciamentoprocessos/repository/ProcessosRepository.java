@@ -15,16 +15,29 @@ import java.time.LocalDate;
 public interface ProcessosRepository extends JpaRepository<Processo, Long> {
 
     @Query("""
-        SELECT DISTINCT p FROM Processo p
-        JOIN p.partesEnvolvidas parte
-        LEFT JOIN parte.documento doc
-        WHERE (:status IS NULL OR p.status = :status)
-          AND (:dataAbertura IS NULL OR p.dataAbertura = :dataAbertura)
-          AND (:documento IS NULL OR doc.valor LIKE %:documento%)
+    SELECT DISTINCT p FROM Processo p
+    JOIN p.partesEnvolvidas parte
+    LEFT JOIN parte.documento doc
+    WHERE (:status IS NULL OR p.status = :status)
+      AND p.dataAbertura = :dataAbertura
+      AND (:documento IS NULL OR doc.valor LIKE %:documento%)
     """)
-    Page<Processo> buscarPorFiltros(
+    Page<Processo> buscarPorFiltrosComData(
             @Param("status") StatusProcesso status,
             @Param("dataAbertura") LocalDate dataAbertura,
+            @Param("documento") String documento,
+            Pageable pageable
+    );
+
+    @Query("""
+    SELECT DISTINCT p FROM Processo p
+    JOIN p.partesEnvolvidas parte
+    LEFT JOIN parte.documento doc
+    WHERE (:status IS NULL OR p.status = :status)
+      AND (:documento IS NULL OR doc.valor LIKE %:documento%)
+    """)
+    Page<Processo> buscarPorFiltrosSemData(
+            @Param("status") StatusProcesso status,
             @Param("documento") String documento,
             Pageable pageable
     );

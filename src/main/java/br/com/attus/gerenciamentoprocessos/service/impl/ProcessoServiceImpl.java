@@ -83,8 +83,13 @@ public class ProcessoServiceImpl implements ProcessoService {
             StatusProcesso status,
             LocalDate dataAbertura,
             String documento,
-            Pageable pageable) {
-        return processosRepository.buscarPorFiltros(status, dataAbertura, documento, pageable);
+            Pageable pageable
+    ) {
+        if (dataAbertura != null) {
+            return processosRepository.buscarPorFiltrosComData(status, dataAbertura, documento, pageable);
+        } else {
+            return processosRepository.buscarPorFiltrosSemData(status, documento, pageable);
+        }
     }
 
     @Override

@@ -155,7 +155,7 @@ class ProcessoServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Processo> pageMock = new PageImpl<>(List.of(processo));
 
-        when(processosRepository.buscarPorFiltros(StatusProcesso.ATIVO, processo.getDataAbertura(), "12345678900", pageable))
+        when(processosRepository.buscarPorFiltrosComData(StatusProcesso.ATIVO, processo.getDataAbertura(), "12345678900", pageable))
                 .thenReturn(pageMock);
 
         Page<Processo> resultado = service.buscarPorFiltros(StatusProcesso.ATIVO, processo.getDataAbertura(), "12345678900", pageable);
