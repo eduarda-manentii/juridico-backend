@@ -15,6 +15,8 @@ import org.springframework.hateoas.RepresentationModel;
 @Builder
 public class ParteEnvolvidaDto extends RepresentationModel<ParteEnvolvidaDto> {
 
+    private Long id;
+
     @NotEmpty(message = "Nome completo é obrigatório")
     private String nomeCompleto;
 

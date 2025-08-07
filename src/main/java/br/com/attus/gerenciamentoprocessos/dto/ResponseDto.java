@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ResponseDto {
 
+    private Long id;
+
     @NotNull(message = "O email é obrigatório")
     private String email;
 

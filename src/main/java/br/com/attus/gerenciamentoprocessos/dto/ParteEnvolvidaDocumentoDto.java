@@ -11,6 +11,8 @@ import lombok.*;
 @Builder
 public class ParteEnvolvidaDocumentoDto {
 
+    private Long id;
+
     @NotNull(message = "O tipo do documento é obrigatório")
     private TipoDocumento tipoDocumento;
 
