@@ -26,11 +26,10 @@ public class UsuarioController {
     private final TokenService tokenService;
     private final UsuarioMapper mapper;
 
-    public UsuarioController(
-            UsuarioService service,
-            PasswordEncoder passwordEncoder,
-            TokenService tokenService,
-            UsuarioMapper mapper
+    public UsuarioController(UsuarioService service,
+                             PasswordEncoder passwordEncoder,
+                             TokenService tokenService,
+                             UsuarioMapper mapper
     ) {
         this.service = service;
         this.passwordEncoder = passwordEncoder;

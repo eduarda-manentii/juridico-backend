@@ -28,5 +28,5 @@ public interface ProcessoService {
 
     Page<Processo> listarTodos(Pageable pageable);
 
-    boolean existsByAndamentoProcessual_Id(Long id);
+    boolean existsByAndamentoProcessualId(Long id);
 }

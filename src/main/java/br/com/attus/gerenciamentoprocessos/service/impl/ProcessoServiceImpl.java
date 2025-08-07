@@ -93,8 +93,8 @@ public class ProcessoServiceImpl implements ProcessoService {
     }
 
     @Override
-    public boolean existsByAndamentoProcessual_Id(Long id) {
-        return processosRepository.existsByAndamentoProcessual_Id(id);
+    public boolean existsByAndamentoProcessualId(Long id) {
+        return processosRepository.existsByAndamentoProcessualId(id);
     }
 
     @Override

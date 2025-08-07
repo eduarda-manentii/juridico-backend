@@ -37,7 +37,7 @@ public class AndamentoProcessualServiceImpl implements AndamentoProcessualServic
 
     @Override
     public void excluir(Long id) {
-        boolean existeEmProcesso = processosRepository.existsByAndamentoProcessual_Id(id);
+        boolean existeEmProcesso = processosRepository.existsByAndamentoProcessualId(id);
         if (existeEmProcesso) {
             throw new EntidadeEmUsoException("Não é possível excluir. Este andamento processual está vinculado a um processo.");
         }

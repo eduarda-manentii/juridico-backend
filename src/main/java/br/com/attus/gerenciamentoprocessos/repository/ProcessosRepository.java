@@ -42,8 +42,8 @@ public interface ProcessosRepository extends JpaRepository<Processo, Long> {
             Pageable pageable
     );
 
-    boolean existsByAndamentoProcessual_Id(Long andamentoProcessualId);
+    boolean existsByAndamentoProcessualId(Long andamentoProcessualId);
 
-    boolean existsByPartesEnvolvidas_Id(Long parteEnvolvidaId);
+    boolean existsByPartesEnvolvidasId(Long parteEnvolvidaId);
 
 }

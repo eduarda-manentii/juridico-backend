@@ -2,8 +2,6 @@ package br.com.attus.gerenciamentoprocessos.mapper;
 
 import br.com.attus.gerenciamentoprocessos.dto.ParteEnvolvidaDto;
 import br.com.attus.gerenciamentoprocessos.dto.ProcessoDto;
-import br.com.attus.gerenciamentoprocessos.model.AndamentoProcessual;
-import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
 import br.com.attus.gerenciamentoprocessos.model.Processo;
 import org.springframework.stereotype.Component;
 
@@ -26,10 +24,10 @@ public class ProcessoMapper {
 
 
     public ProcessoDto toDto(Processo processo) {
-        List<ParteEnvolvidaDto> lista = processo.getPartesEnvolvidas()
+        List<ParteEnvolvidaDto> lista = new java.util.ArrayList<>(processo.getPartesEnvolvidas()
                 .stream()
                 .map(parteEnvolvidaMapper::toDto)
-                .collect(Collectors.toList());
+                .toList());
         Collections.reverse(lista);
         return ProcessoDto.builder()
                 .id(processo.getId())

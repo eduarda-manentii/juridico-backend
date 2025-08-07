@@ -1,5 +1,6 @@
 package br.com.attus.gerenciamentoprocessos.security;
 
+import br.com.attus.gerenciamentoprocessos.exceptions.TokenGenerationException;
 import br.com.attus.gerenciamentoprocessos.exceptions.TokenInvalidoException;
 import br.com.attus.gerenciamentoprocessos.model.Usuario;
 import com.auth0.jwt.JWT;
@@ -27,7 +28,7 @@ public class TokenService {
                     .withExpiresAt(this.generateExpirationDate())
                     .sign(algorithm);
         } catch (JWTCreationException e) {
-            throw new RuntimeException("Erro durante a autenticação.");
+            throw new TokenGenerationException("Erro durante a geração do token.", e);
         }
     }
 

@@ -1,10 +1,8 @@
 package br.com.attus.gerenciamentoprocessos.controller;
 
-import br.com.attus.gerenciamentoprocessos.dto.ParteEnvolvidaDto;
 import br.com.attus.gerenciamentoprocessos.dto.ProcessoDto;
 import br.com.attus.gerenciamentoprocessos.exceptions.ObrigatoriedadeIdException;
 import br.com.attus.gerenciamentoprocessos.mapper.ProcessoMapper;
-import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
 import br.com.attus.gerenciamentoprocessos.model.Processo;
 import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
 import br.com.attus.gerenciamentoprocessos.service.ProcessoService;
@@ -18,8 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -28,6 +24,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/processos")
 public class ProcessoController {
+
+    private static final String REL_UPDATE = "update";
+    private static final String REL_DELETE = "delete";
+    private static final String REL_CREATE = "create";
 
     private final ProcessoService service;
     private final ProcessoMapper mapper;
@@ -63,9 +63,9 @@ public class ProcessoController {
         Processo processo = service.buscarPorId(id);
         ProcessoDto dto = mapper.toDto(processo);
         dto.add(linkTo(methodOn(ProcessoController.class).buscarPorId(id)).withSelfRel());
-        dto.add(linkTo(methodOn(ProcessoController.class).alterar(dto)).withRel("update"));
-        dto.add(linkTo(methodOn(ProcessoController.class).excluir(id)).withRel("delete"));
-        dto.add(linkTo(methodOn(ProcessoController.class).inserir(dto)).withRel("create"));
+        dto.add(linkTo(methodOn(ProcessoController.class).alterar(dto)).withRel(REL_UPDATE));
+        dto.add(linkTo(methodOn(ProcessoController.class).excluir(id)).withRel(REL_DELETE));
+        dto.add(linkTo(methodOn(ProcessoController.class).inserir(dto)).withRel(REL_CREATE));
         return ResponseEntity.ok(dto);
     }
 
@@ -93,9 +93,9 @@ public class ProcessoController {
         Page<ProcessoDto> dtos = processos.map(processo -> {
             ProcessoDto dto = mapper.toDto(processo);
             dto.add(linkTo(methodOn(ProcessoController.class).buscarPorId(dto.getId())).withSelfRel());
-            dto.add(linkTo(methodOn(ProcessoController.class).alterar(dto)).withRel("update"));
-            dto.add(linkTo(methodOn(ProcessoController.class).excluir(dto.getId())).withRel("delete"));
-            dto.add(linkTo(methodOn(ProcessoController.class).inserir(dto)).withRel("create"));
+            dto.add(linkTo(methodOn(ProcessoController.class).alterar(dto)).withRel(REL_UPDATE));
+            dto.add(linkTo(methodOn(ProcessoController.class).excluir(dto.getId())).withRel(REL_DELETE));
+            dto.add(linkTo(methodOn(ProcessoController.class).inserir(dto)).withRel(REL_CREATE));
             return dto;
         });
         return ResponseEntity.ok(dtos);
@@ -112,12 +112,12 @@ public class ProcessoController {
                 .map(entidade -> {
                     ProcessoDto dto = mapper.toDto(entidade);
                     dto.add(linkTo(methodOn(ProcessoController.class).buscarPorId(entidade.getId())).withSelfRel());
-                    dto.add(linkTo(methodOn(ProcessoController.class).alterar(dto)).withRel("update"));
-                    dto.add(linkTo(methodOn(ProcessoController.class).excluir(entidade.getId())).withRel("delete"));
-                    dto.add(linkTo(methodOn(ProcessoController.class).inserir(dto)).withRel("create"));
+                    dto.add(linkTo(methodOn(ProcessoController.class).alterar(dto)).withRel(REL_UPDATE));
+                    dto.add(linkTo(methodOn(ProcessoController.class).excluir(entidade.getId())).withRel(REL_DELETE));
+                    dto.add(linkTo(methodOn(ProcessoController.class).inserir(dto)).withRel(REL_CREATE));
                     return dto;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         Page<ProcessoDto> pageDto = new PageImpl<>(dtos, pageable, pageEntidades.getTotalElements());
         return ResponseEntity.ok(pageDto);

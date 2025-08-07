@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -52,13 +53,17 @@ public class ParteEnvolvidaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ParteEnvolvidaDto> buscarPorId(@PathVariable("id") Long id) {
-        ParteEnvolvida parteEnvolvida = service.buscarPorId(id);
-        ParteEnvolvidaDto dto = parteEnvolvidaMapper.toDto(parteEnvolvida);
-        dto.add(linkTo(methodOn(ParteEnvolvidaController.class).buscarPorId(id)).withSelfRel());
-        dto.add(linkTo(methodOn(ParteEnvolvidaController.class).alterar(dto)).withRel("update"));
-        dto.add(linkTo(methodOn(ParteEnvolvidaController.class).excluir(id)).withRel("delete"));
-        dto.add(linkTo(methodOn(ParteEnvolvidaController.class).inserir(dto)).withRel("create"));
-        return ResponseEntity.ok(dto);
+        try {
+            ParteEnvolvida parteEnvolvida = service.buscarPorId(id);
+            ParteEnvolvidaDto dto = parteEnvolvidaMapper.toDto(parteEnvolvida);
+            dto.add(linkTo(methodOn(ParteEnvolvidaController.class).buscarPorId(id)).withSelfRel());
+            dto.add(linkTo(methodOn(ParteEnvolvidaController.class).alterar(dto)).withRel("update"));
+            dto.add(linkTo(methodOn(ParteEnvolvidaController.class).excluir(id)).withRel("delete"));
+            dto.add(linkTo(methodOn(ParteEnvolvidaController.class).inserir(dto)).withRel("create"));
+            return ResponseEntity.ok(dto);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -83,7 +88,7 @@ public class ParteEnvolvidaController {
                     dto.add(linkTo(methodOn(ParteEnvolvidaController.class).inserir(dto)).withRel("create"));
                     return dto;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         Page<ParteEnvolvidaDto> pageDto = new PageImpl<>(dtos, pageable, pageEntidades.getTotalElements());
         return ResponseEntity.ok(pageDto);

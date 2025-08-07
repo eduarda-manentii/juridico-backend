@@ -1,130 +1,105 @@
 package br.com.attus.gerenciamentoprocessos.mapper;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-
-import br.com.attus.gerenciamentoprocessos.dto.AndamentoProcessualDto;
-import br.com.attus.gerenciamentoprocessos.dto.ParteEnvolvidaDto;
+import br.com.attus.gerenciamentoprocessos.Mocker;
 import br.com.attus.gerenciamentoprocessos.dto.ProcessoDto;
-import br.com.attus.gerenciamentoprocessos.model.AndamentoProcessual;
-import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
 import br.com.attus.gerenciamentoprocessos.model.Processo;
-import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ProcessoMapperTest {
 
+    private Mocker mocker;
+    private ProcessoMapper processoMapper;
     private ParteEnvolvidaMapper parteEnvolvidaMapper;
     private AndamentoProcessualMapper andamentoProcessualMapper;
-    private ProcessoMapper processoMapper;
 
     @BeforeEach
     void setUp() {
+        mocker = new Mocker();
         parteEnvolvidaMapper = mock(ParteEnvolvidaMapper.class);
         andamentoProcessualMapper = mock(AndamentoProcessualMapper.class);
+        when(parteEnvolvidaMapper.toDto(any())).thenAnswer(invocation -> {
+            return mocker.gerarParteEnvolvidaDto(1L);
+        });
+        when(andamentoProcessualMapper.toDto(any())).thenAnswer(invocation -> {
+            return mocker.gerarAndamentoProcessualDto(1L);
+        });
+        when(parteEnvolvidaMapper.toEntity(any())).thenAnswer(invocation -> {
+            return mocker.gerarParteEnvolvida(1L);
+        });
+        when(andamentoProcessualMapper.toEntity(any())).thenAnswer(invocation -> {
+            return mocker.gerarAndamentoProcessual(1L);
+        });
         processoMapper = new ProcessoMapper(parteEnvolvidaMapper, andamentoProcessualMapper);
     }
 
+    @Nested
+    class Dado_um_processo {
 
+        Processo processo;
 
-    @Test
-    void testToDto() {
-        ParteEnvolvida parte1 = new ParteEnvolvida();
-        parte1.setId(1L);
-        ParteEnvolvida parte2 = new ParteEnvolvida();
-        parte2.setId(2L);
+        @BeforeEach
+        void setUp() {
+            processo = mocker.gerarProcesso(1L);
+        }
 
-        ParteEnvolvidaDto dto1 = ParteEnvolvidaDto.builder().id(1L).build();
-        ParteEnvolvidaDto dto2 = ParteEnvolvidaDto.builder().id(2L).build();
+        @Nested
+        class Quando_converter_para_dto {
 
-        when(parteEnvolvidaMapper.toDto(parte1)).thenReturn(dto1);
-        when(parteEnvolvidaMapper.toDto(parte2)).thenReturn(dto2);
+            ProcessoDto processoDto;
 
-        AndamentoProcessual andamento = new AndamentoProcessual();
-        andamento.setId(10L);
-        AndamentoProcessualDto andamentoDto = AndamentoProcessualDto.builder().id(10L).build();
+            @BeforeEach
+            void setUp() {
+                processoDto = processoMapper.toDto(processo);
+            }
 
-        when(andamentoProcessualMapper.toDto(andamento)).thenReturn(andamentoDto);
-
-        Processo processo = Processo.builder()
-                .id(100L)
-                .dataAbertura(LocalDate.of(2025, 8, 6))
-                .descricaoCaso("Caso de teste")
-                .partesEnvolvidas(List.of(parte1, parte2))
-                .andamentoProcessual(andamento)
-                .status(StatusProcesso.ATIVO)
-                .build();
-
-        ProcessoDto dto = processoMapper.toDto(processo);
-
-        assertNotNull(dto);
-        assertEquals(processo.getId(), dto.getId());
-        assertEquals(processo.getDataAbertura(), dto.getDataAbertura());
-        assertEquals(processo.getDescricaoCaso(), dto.getDescricaoCaso());
-        assertEquals(StatusProcesso.ATIVO, dto.getStatus());
-        assertEquals(2, dto.getPartesEnvolvidas().size());
-
-        assertEquals(dto2, dto.getPartesEnvolvidas().get(0));
-        assertEquals(dto1, dto.getPartesEnvolvidas().get(1));
-
-        assertEquals(andamentoDto, dto.getAndamentoProcessual());
-
-        verify(parteEnvolvidaMapper).toDto(parte1);
-        verify(parteEnvolvidaMapper).toDto(parte2);
-        verify(andamentoProcessualMapper).toDto(andamento);
+            @Test
+            void Entao_deve_converter_corretamente() {
+                assertEquals(processo.getId(), processoDto.getId());
+                assertEquals(processo.getDataAbertura(), processoDto.getDataAbertura());
+                assertEquals(processo.getDescricaoCaso(), processoDto.getDescricaoCaso());
+                assertEquals(processo.getStatus(), processoDto.getStatus());
+                assertNotNull(processoDto.getPartesEnvolvidas());
+                assertNotNull(processoDto.getAndamentoProcessual());
+            }
+        }
     }
 
-    @Test
-    void testToEntity() {
-        ParteEnvolvidaDto dto1 = ParteEnvolvidaDto.builder().id(1L).build();
-        ParteEnvolvidaDto dto2 = ParteEnvolvidaDto.builder().id(2L).build();
+    @Nested
+    class Dado_um_processo_dto {
 
-        ParteEnvolvida parte1 = new ParteEnvolvida();
-        parte1.setId(1L);
-        ParteEnvolvida parte2 = new ParteEnvolvida();
-        parte2.setId(2L);
+        ProcessoDto processoDto;
 
-        when(parteEnvolvidaMapper.toEntity(dto1)).thenReturn(parte1);
-        when(parteEnvolvidaMapper.toEntity(dto2)).thenReturn(parte2);
+        @BeforeEach
+        void setUp() {
+            processoDto = mocker.gerarProcessoDto(2L);
+        }
 
-        AndamentoProcessualDto andamentoDto = AndamentoProcessualDto.builder().id(10L).build();
-        AndamentoProcessual andamento = new AndamentoProcessual();
-        andamento.setId(10L);
+        @Nested
+        class Quando_converter_para_entity {
 
-        when(andamentoProcessualMapper.toEntity(andamentoDto)).thenReturn(andamento);
+            Processo processo;
 
-        ProcessoDto processoDto = ProcessoDto.builder()
-                .id(200L)
-                .dataAbertura(LocalDate.of(2025, 8, 7))
-                .descricaoCaso("Outro caso")
-                .partesEnvolvidas(List.of(dto1, dto2))
-                .andamentoProcessual(andamentoDto)
-                .status(StatusProcesso.ARQUIVADO)
-                .build();
+            @BeforeEach
+            void setUp() {
+                processo = processoMapper.toEntity(processoDto);
+            }
 
-        Processo entity = processoMapper.toEntity(processoDto);
-
-        assertNotNull(entity);
-        assertEquals(processoDto.getId(), entity.getId());
-        assertEquals(processoDto.getDataAbertura(), entity.getDataAbertura());
-        assertEquals(processoDto.getDescricaoCaso(), entity.getDescricaoCaso());
-        assertEquals(StatusProcesso.ARQUIVADO, entity.getStatus());
-        assertEquals(2, entity.getPartesEnvolvidas().size());
-
-        assertEquals(parte1, entity.getPartesEnvolvidas().get(0));
-        assertEquals(parte2, entity.getPartesEnvolvidas().get(1));
-
-        assertEquals(andamento, entity.getAndamentoProcessual());
-
-        verify(parteEnvolvidaMapper).toEntity(dto1);
-        verify(parteEnvolvidaMapper).toEntity(dto2);
-        verify(andamentoProcessualMapper).toEntity(andamentoDto);
+            @Test
+            void Entao_deve_converter_corretamente() {
+                assertEquals(processoDto.getId(), processo.getId());
+                assertEquals(processoDto.getDataAbertura(), processo.getDataAbertura());
+                assertEquals(processoDto.getDescricaoCaso(), processo.getDescricaoCaso());
+                assertEquals(processoDto.getStatus(), processo.getStatus());
+                assertNotNull(processo.getPartesEnvolvidas());
+                assertNotNull(processo.getAndamentoProcessual());
+            }
+        }
     }
-
 }

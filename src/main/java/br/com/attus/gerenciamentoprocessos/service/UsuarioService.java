@@ -1,6 +1,5 @@
 package br.com.attus.gerenciamentoprocessos.service;
 
-import br.com.attus.gerenciamentoprocessos.model.Processo;
 import br.com.attus.gerenciamentoprocessos.model.Usuario;
 import org.springframework.validation.annotation.Validated;
 

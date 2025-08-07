@@ -23,9 +23,12 @@ public class ParteEnvolvidaServiceImpl implements ParteEnvolvidaService {
     private final PartesEnvolvidasDocumentosRepository partesEnvolvidasDocumentosRepository;
     private final ProcessosRepository processosRepository;
 
-    public ParteEnvolvidaServiceImpl(PartesEnvolvidasRepository partesEnvolvidasRepository, PartesEnvolvidasDocumentosRepository partesEnvolvidasDocumentosRepository, PartesEnvolvidasDocumentosRepository partesEnvolvidasDocumentosRepository1, ProcessosRepository processosRepository) {
+    public ParteEnvolvidaServiceImpl(
+            PartesEnvolvidasRepository partesEnvolvidasRepository,
+            PartesEnvolvidasDocumentosRepository partesEnvolvidasDocumentosRepository,
+            ProcessosRepository processosRepository) {
         this.partesEnvolvidasRepository = partesEnvolvidasRepository;
-        this.partesEnvolvidasDocumentosRepository = partesEnvolvidasDocumentosRepository1;
+        this.partesEnvolvidasDocumentosRepository = partesEnvolvidasDocumentosRepository;
         this.processosRepository = processosRepository;
     }
 
@@ -54,7 +57,7 @@ public class ParteEnvolvidaServiceImpl implements ParteEnvolvidaService {
 
     @Override
     public void excluir(Long id) {
-        boolean existeEmProcesso = processosRepository.existsByPartesEnvolvidas_Id(id);
+        boolean existeEmProcesso = processosRepository.existsByPartesEnvolvidasId(id);
         if (existeEmProcesso) {
             throw new EntidadeEmUsoException("Não é possível excluir. Esta parte está envolvida com um processo.");
         }

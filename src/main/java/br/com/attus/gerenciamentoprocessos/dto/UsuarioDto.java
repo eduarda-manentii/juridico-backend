@@ -1,6 +1,5 @@
 package br.com.attus.gerenciamentoprocessos.dto;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

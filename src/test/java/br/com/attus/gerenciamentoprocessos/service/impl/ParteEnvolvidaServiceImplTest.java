@@ -11,6 +11,7 @@ import br.com.attus.gerenciamentoprocessos.repository.PartesEnvolvidasRepository
 import br.com.attus.gerenciamentoprocessos.repository.ProcessosRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -38,158 +39,180 @@ class ParteEnvolvidaServiceImplTest {
     @Mock
     private ProcessosRepository processosRepository;
 
+    private ParteEnvolvida parte;
+    private ParteEnvolvidaDocumento documento;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        documento = new ParteEnvolvidaDocumento();
+        documento.setId(1L);
+        documento.setValor("12345678900");
+        documento.setTipoDocumento(TipoDocumento.CPF);
+
+        parte = new ParteEnvolvida();
+        parte.setId(1L);
+        parte.setDocumento(documento);
+        parte.setTelefone("(48) 99999-9999");
+        parte.setTipoParteEnvolvida(TipoParteEnvolvida.AUTOR);
+    }
+
+    @Nested
+    class Dado_salvar {
+
+        @Test
+        void Deve_salvar_uma_parte_envolvida_nova_sem_duplicidade() {
+            parte.setId(null);
+            parte.getDocumento().setId(1L);
+
+            when(documentosRepository.findById(1L)).thenReturn(Optional.of(documento));
+            when(partesRepository.findByTipoParteEnvolvidaAndDocumentoValor(any(), any()))
+                    .thenReturn(Collections.emptyList());
+            when(partesRepository.save(any())).thenReturn(parte);
+
+            ParteEnvolvida resultado = service.salvar(parte);
+
+            assertNotNull(resultado);
+            verify(partesRepository).save(parte);
+        }
+
+        @Test
+        void Deve_atualizar_uma_parte_envolvida_existente_sem_alterar_documento() {
+            ParteEnvolvida existente = new ParteEnvolvida();
+            existente.setId(1L);
+            existente.setDocumento(documento);
+
+            when(partesRepository.findById(1L)).thenReturn(Optional.of(existente));
+            when(documentosRepository.findById(1L)).thenReturn(Optional.of(documento));
+            when(partesRepository.save(any())).thenReturn(parte);
+
+            ParteEnvolvida resultado = service.salvar(parte);
+
+            assertEquals(parte, resultado);
+            verify(partesRepository).save(parte);
+        }
+
+        @Test
+        void Deve_lancar_excecao_quando_tentar_salvar_com_documento_duplicado() {
+            parte.setId(null);
+            parte.setDocumento(new ParteEnvolvidaDocumento());
+            parte.getDocumento().setValor("12345678900");
+            parte.getDocumento().setId(null);
+
+            ParteEnvolvida outraParte = new ParteEnvolvida();
+            outraParte.setId(2L);
+            ParteEnvolvidaDocumento outroDoc = new ParteEnvolvidaDocumento();
+            outroDoc.setValor("12345678900");
+            outraParte.setDocumento(outroDoc);
+
+            when(partesRepository.findByTipoParteEnvolvidaAndDocumentoValor(any(), any()))
+                    .thenReturn(List.of(outraParte));
+
+            assertThrows(DuplicidadeDocumentoException.class, () -> service.salvar(parte));
+        }
+
+        @Test
+        void Deve_validar_documento_cpf_invalido() {
+            parte.getDocumento().setValor("123");
+            assertThrows(IllegalArgumentException.class, () -> service.salvar(parte));
+        }
+
+        @Test
+        void Deve_validar_documento_cnpj_invalido() {
+            parte.getDocumento().setValor("123");
+            parte.getDocumento().setTipoDocumento(TipoDocumento.CNPJ);
+
+            assertThrows(IllegalArgumentException.class, () -> service.salvar(parte));
+        }
+
+        @Test
+        void Deve_buscar_documento_existente_ao_validar_documento() {
+            parte.getDocumento().setId(1L);
+
+            when(partesRepository.findByTipoParteEnvolvidaAndDocumentoValor(any(), any()))
+                    .thenReturn(Collections.emptyList());
+
+            when(documentosRepository.findById(1L)).thenReturn(Optional.of(documento));
+
+            when(partesRepository.findById(parte.getId())).thenReturn(Optional.of(parte));
+
+            when(partesRepository.save(any())).thenReturn(parte);
+
+            ParteEnvolvida resultado = service.salvar(parte);
+
+            assertNotNull(resultado);
+            verify(documentosRepository).findById(1L);
+        }
+    }
+
+    @Nested
+    class Dado_buscar_por_id {
+
+        @Test
+        void Deve_retornar_parte_envolvida_quando_existir() {
+            when(partesRepository.findById(1L)).thenReturn(Optional.of(parte));
+
+            ParteEnvolvida resultado = service.buscarPorId(1L);
+
+            assertEquals(parte, resultado);
+        }
+
+        @Test
+        void Deve_lancar_excecao_quando_parte_envolvida_nao_existir() {
+            when(partesRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThrows(EntityNotFoundException.class, () -> service.buscarPorId(99L));
+        }
+    }
+
+    @Nested
+    class Dado_excluir {
+
+        @Test
+        void Deve_excluir_quando_parte_nao_estiver_em_uso() {
+            when(processosRepository.existsByPartesEnvolvidasId(1L)).thenReturn(false);
+
+            service.excluir(1L);
+
+            verify(partesRepository).deleteById(1L);
+        }
+
+        @Test
+        void Deve_lancar_excecao_quando_parte_estiver_em_uso() {
+            when(processosRepository.existsByPartesEnvolvidasId(1L)).thenReturn(true);
+
+            assertThrows(EntidadeEmUsoException.class, () -> service.excluir(1L));
+            verify(partesRepository, never()).deleteById(any());
+        }
+    }
+
+    @Nested
+    class Dado_listar_por_ids {
+
+        @Test
+        void Deve_retornar_lista_correspondente() {
+            List<Long> ids = List.of(1L, 2L);
+            List<ParteEnvolvida> partes = List.of(parte, criarParteEnvolvida(2L));
+
+            when(partesRepository.findAllById(ids)).thenReturn(partes);
+
+            List<ParteEnvolvida> resultado = service.listarPorIds(ids);
+
+            assertEquals(2, resultado.size());
+        }
     }
 
     private ParteEnvolvida criarParteEnvolvida(Long id) {
         ParteEnvolvidaDocumento doc = new ParteEnvolvidaDocumento();
         doc.setId(1L);
-        doc.setValor("123.456.789-00");
+        doc.setValor("12345678900");
         doc.setTipoDocumento(TipoDocumento.CPF);
 
-        ParteEnvolvida parte = new ParteEnvolvida();
-        parte.setId(id);
-        parte.setDocumento(doc);
-        parte.setTelefone("(48) 99999-9999");
-        parte.setTipoParteEnvolvida(TipoParteEnvolvida.AUTOR);
-        return parte;
+        ParteEnvolvida p = new ParteEnvolvida();
+        p.setId(id);
+        p.setDocumento(doc);
+        p.setTelefone("(48) 99999-9999");
+        p.setTipoParteEnvolvida(TipoParteEnvolvida.AUTOR);
+        return p;
     }
-
-    @Test
-    void deveSalvarParteEnvolvida_NovoSemDuplicidade() {
-        ParteEnvolvida parte = criarParteEnvolvida(null);
-        parte.getDocumento().setValor("12345678900");
-
-        when(documentosRepository.findById(1L)).thenReturn(Optional.of(parte.getDocumento()));
-
-        when(partesRepository.findByTipoParteEnvolvidaAndDocumentoValor(any(), any())).thenReturn(Collections.emptyList());
-        when(partesRepository.save(any())).thenReturn(parte);
-
-        ParteEnvolvida resultado = service.salvar(parte);
-
-        assertNotNull(resultado);
-        verify(partesRepository).save(parte);
-    }
-
-    @Test
-    void deveSalvarParteEnvolvida_AtualizacaoSemAlterarDocumento() {
-        ParteEnvolvida parte = criarParteEnvolvida(1L);
-        parte.getDocumento().setValor("12345678900");
-
-        ParteEnvolvida existente = criarParteEnvolvida(1L);
-        existente.getDocumento().setValor("12345678900");
-
-        when(partesRepository.findById(1L)).thenReturn(Optional.of(existente));
-        when(documentosRepository.findById(1L)).thenReturn(Optional.of(parte.getDocumento())); // <-- mock necessário
-        when(partesRepository.save(any())).thenReturn(parte);
-
-        ParteEnvolvida resultado = service.salvar(parte);
-
-        assertEquals(parte, resultado);
-        verify(partesRepository).save(parte);
-    }
-
-    @Test
-    void deveLancarDuplicidadeAoSalvarComMesmoDocumentoDeOutraParte() {
-        ParteEnvolvida parte = criarParteEnvolvida(null);
-        parte.getDocumento().setId(null);  // importante para não buscar no repo de documentos
-        parte.getDocumento().setValor("12345678900");
-
-        ParteEnvolvida outro = criarParteEnvolvida(2L);
-        outro.getDocumento().setValor("12345678900");
-
-        when(partesRepository.findByTipoParteEnvolvidaAndDocumentoValor(any(), any()))
-                .thenReturn(List.of(outro));
-
-        assertThrows(DuplicidadeDocumentoException.class, () -> service.salvar(parte));
-    }
-
-    @Test
-    void deveBuscarPorId_ComSucesso() {
-        ParteEnvolvida parte = criarParteEnvolvida(1L);
-        when(partesRepository.findById(1L)).thenReturn(Optional.of(parte));
-
-        ParteEnvolvida resultado = service.buscarPorId(1L);
-
-        assertEquals(parte, resultado);
-    }
-
-    @Test
-    void deveLancarExcecaoAoBuscarPorIdInexistente() {
-        when(partesRepository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThrows(EntityNotFoundException.class, () -> service.buscarPorId(99L));
-    }
-
-    @Test
-    void deveExcluir_ComSucesso() {
-        when(processosRepository.existsByPartesEnvolvidas_Id(1L)).thenReturn(false);
-
-        service.excluir(1L);
-
-        verify(partesRepository).deleteById(1L);
-    }
-
-    @Test
-    void deveLancarExcecao_SeParteEstiverEmUso() {
-        when(processosRepository.existsByPartesEnvolvidas_Id(1L)).thenReturn(true);
-
-        assertThrows(EntidadeEmUsoException.class, () -> service.excluir(1L));
-        verify(partesRepository, never()).deleteById(any());
-    }
-
-    @Test
-    void deveListarPorIds() {
-        List<Long> ids = List.of(1L, 2L);
-        List<ParteEnvolvida> partes = List.of(criarParteEnvolvida(1L), criarParteEnvolvida(2L));
-
-        when(partesRepository.findAllById(ids)).thenReturn(partes);
-
-        List<ParteEnvolvida> resultado = service.listarPorIds(ids);
-
-        assertEquals(2, resultado.size());
-    }
-
-    @Test
-    void deveValidarDocumentoCpfInvalido() {
-        ParteEnvolvida parte = criarParteEnvolvida(null);
-        parte.getDocumento().setValor("123"); // CPF inválido
-
-        parte.setTelefone("(48) 99999-9999");
-
-        assertThrows(IllegalArgumentException.class, () -> service.salvar(parte));
-    }
-
-    @Test
-    void deveValidarDocumentoCnpjInvalido() {
-        ParteEnvolvida parte = criarParteEnvolvida(null);
-        parte.getDocumento().setValor("123");
-        parte.getDocumento().setTipoDocumento(TipoDocumento.CNPJ);
-
-        assertThrows(IllegalArgumentException.class, () -> service.salvar(parte));
-    }
-
-    @Test
-    void deveBuscarDocumentoExistenteAoValidarDocumento() {
-        ParteEnvolvida parte = criarParteEnvolvida(null);
-        parte.getDocumento().setId(1L);
-        parte.getDocumento().setValor("12345678900");
-
-        ParteEnvolvidaDocumento documentoExistente = new ParteEnvolvidaDocumento();
-        documentoExistente.setId(1L);
-        documentoExistente.setValor("12345678900");
-
-        when(partesRepository.findByTipoParteEnvolvidaAndDocumentoValor(any(), any()))
-                .thenReturn(Collections.emptyList());
-        when(documentosRepository.findById(1L)).thenReturn(Optional.of(documentoExistente));
-        when(partesRepository.save(any())).thenReturn(parte);
-
-        ParteEnvolvida resultado = service.salvar(parte);
-
-        assertNotNull(resultado);
-        verify(documentosRepository).findById(1L);
-    }
-
 }

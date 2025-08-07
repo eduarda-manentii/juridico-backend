@@ -35,16 +35,21 @@ class AndamentoProcessualDtoTest {
     void deveValidarCamposObrigatoriosNulosOuInvalidos() {
         AndamentoProcessualDto dto = new AndamentoProcessualDto();
         Set<ConstraintViolation<AndamentoProcessualDto>> violations = validator.validate(dto);
-        assertThat(violations).hasSize(3);
 
-        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("tipoAndamentoProcessual")
-                && v.getMessage().equals("O tipo do andamento processual é obrigatório"));
-
-        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("dataRegistro")
-                && v.getMessage().equals("A data de registro é obrigatória"));
-
-        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("descricao")
-                && v.getMessage().equals("A descricao é obrigatória"));
+        assertThat(violations)
+                .hasSize(3)
+                .anySatisfy(v -> {
+                    assertThat(v.getPropertyPath().toString()).isEqualTo("tipoAndamentoProcessual");
+                    assertThat(v.getMessage()).isEqualTo("O tipo do andamento processual é obrigatório");
+                })
+                .anySatisfy(v -> {
+                    assertThat(v.getPropertyPath().toString()).isEqualTo("dataRegistro");
+                    assertThat(v.getMessage()).isEqualTo("A data de registro é obrigatória");
+                })
+                .anySatisfy(v -> {
+                    assertThat(v.getPropertyPath().toString()).isEqualTo("descricao");
+                    assertThat(v.getMessage()).isEqualTo("A descricao é obrigatória");
+                });
     }
 
     @Test

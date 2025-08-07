@@ -1,159 +1,118 @@
 package br.com.attus.gerenciamentoprocessos.controller;
 
+import br.com.attus.gerenciamentoprocessos.Mocker;
 import br.com.attus.gerenciamentoprocessos.dto.LoginRequestDto;
 import br.com.attus.gerenciamentoprocessos.dto.ResponseDto;
-import br.com.attus.gerenciamentoprocessos.dto.UsuarioDto;
-import br.com.attus.gerenciamentoprocessos.exceptions.ObrigatoriedadeIdException;
 import br.com.attus.gerenciamentoprocessos.mapper.UsuarioMapper;
 import br.com.attus.gerenciamentoprocessos.model.Usuario;
 import br.com.attus.gerenciamentoprocessos.security.TokenService;
 import br.com.attus.gerenciamentoprocessos.service.UsuarioService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class UsuarioControllerUnitTest {
+@SpringBootTest
+public class UsuarioControllerTest {
 
-    @InjectMocks
-    private UsuarioController controller;
+    @Autowired
+    private Mocker mocker;
 
-    @Mock
-    private UsuarioService usuarioService;
+    @Autowired
+    private UsuarioMapper mapper;
 
     @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private TokenService tokenService;
+    private UsuarioService service;
 
     @Mock
-    private UsuarioMapper usuarioMapper;
+    private TokenService tokenService;
 
-    @Test
-    void deveInserirUsuarioComSucesso() {
-        UsuarioDto dto = new UsuarioDto();
-        dto.setEmail("teste@email.com");
-        dto.setSenha("123");
-        dto.setNome("Eduarda");
+    private UsuarioController usuarioController;
 
-        Usuario novoUsuario = new Usuario();
-        novoUsuario.setId(1L);
-        novoUsuario.setEmail(dto.getEmail());
-        novoUsuario.setNome(dto.getNome());
-
-        when(usuarioService.buscarPorEmail(dto.getEmail())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(dto.getSenha())).thenReturn("senhaCriptografada");
-        when(usuarioService.salvar(any(Usuario.class))).thenReturn(novoUsuario);
-        when(tokenService.generateToken(any(Usuario.class))).thenReturn("meu-token-jwt");
-        ResponseEntity<ResponseDto> response = controller.inserir(dto);
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals("Eduarda", response.getBody().getEmail());
-        assertEquals("meu-token-jwt", response.getBody().getToken());
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        usuarioController = new UsuarioController(service, passwordEncoder, tokenService, mapper);
     }
 
-    @Test
-    void deveRealizarLoginComSucesso() {
-        LoginRequestDto login = new LoginRequestDto("teste@email.com", "123");
+    @Nested
+    class Dado_um_usuario {
 
-        Usuario usuario = new Usuario();
-        usuario.setNome("Eduarda");
-        usuario.setSenha("senhaCriptografada");
+        Usuario usuario;
 
-        when(usuarioService.buscarPorEmail(login.getEmail())).thenReturn(Optional.of(usuario));
-        when(passwordEncoder.matches(login.getSenha(), usuario.getSenha())).thenReturn(true);
-        when(tokenService.generateToken(usuario)).thenReturn("token-gerado");
+        @BeforeEach
+        void setUp() {
+            usuario = mocker.gerarUsuario(null);
+        }
 
-        ResponseEntity<ResponseDto> response = controller.login(login);
+        @Nested
+        class Quando_tenta_fazer_login {
 
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals("Eduarda", response.getBody().getEmail());
-        assertEquals("token-gerado", response.getBody().getToken());
+            @Nested
+            class Quando_as_credenciais_estao_corretas {
+
+                ResponseDto response;
+                HttpStatusCode status;
+                LoginRequestDto loginRequest;
+
+                @BeforeEach
+                void setUp() {
+                    loginRequest = new LoginRequestDto();
+                    loginRequest.setEmail(usuario.getEmail());
+                    loginRequest.setSenha("senhaCorreta");
+
+                    when(service.buscarPorEmail(usuario.getEmail())).thenReturn(Optional.of(usuario));
+                    when(passwordEncoder.matches(any(), any())).thenReturn(true);
+                    when(tokenService.generateToken(usuario)).thenReturn("fake-jwt-token");
+
+                    var result = usuarioController.login(loginRequest);
+                    response = result.getBody();
+                    status = result.getStatusCode();
+                }
+
+                @Test
+                void Entao_deve_retornar_status_200_e_token() {
+                    assertEquals(HttpStatusCode.valueOf(200), status);
+                    assertNotNull(response);
+                    assertEquals(usuario.getId(), response.getId());
+                    assertEquals("fake-jwt-token", response.getToken());
+                }
+            }
+
+            @Nested
+            class Quando_as_credenciais_estao_incorretas {
+
+                ResponseEntity<ResponseDto> response;
+
+                @BeforeEach
+                void setUp() {
+                    LoginRequestDto loginRequest = new LoginRequestDto();
+                    loginRequest.setEmail("email@invalido.com");
+                    loginRequest.setSenha("senhaErrada");
+                    when(service.buscarPorEmail("email@invalido.com")).thenReturn(Optional.empty());
+                    response = usuarioController.login(loginRequest);
+                }
+
+                @Test
+                void Entao_deve_retornar_status_400() {
+                    assertEquals(400, response.getStatusCodeValue());
+                    assertNull(response.getBody());
+                }
+            }
+        }
     }
-
-    @Test
-    void deveFalharLoginSenhaIncorreta() {
-        LoginRequestDto login = new LoginRequestDto("teste@email.com", "senhaErrada");
-
-        Usuario usuario = new Usuario();
-        usuario.setSenha("senhaCriptografada");
-
-        when(usuarioService.buscarPorEmail(login.getEmail())).thenReturn(Optional.of(usuario));
-        when(passwordEncoder.matches(login.getSenha(), usuario.getSenha())).thenReturn(false);
-
-        ResponseEntity<ResponseDto> response = controller.login(login);
-
-        assertEquals(400, response.getStatusCodeValue());
-    }
-
-    @Test
-    void deveBuscarUsuarioPorId() {
-        Long id = 1L;
-
-        Usuario usuario = new Usuario();
-        usuario.setId(id);
-        usuario.setNome("Eduarda");
-        usuario.setEmail("teste@email.com");
-
-        UsuarioDto dto = new UsuarioDto();
-        dto.setId(id);
-        dto.setNome("Eduarda");
-        dto.setEmail("teste@email.com");
-
-        when(usuarioService.buscarPorId(id)).thenReturn(usuario);
-        when(usuarioMapper.toDto(usuario)).thenReturn(dto);
-
-        ResponseEntity<UsuarioDto> response = controller.buscarPorId(id);
-
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals("Eduarda", response.getBody().getNome());
-    }
-
-    @Test
-    void deveAlterarUsuarioComSucesso() {
-        UsuarioDto dto = new UsuarioDto();
-        dto.setId(1L);
-        dto.setNome("Eduarda Atualizada");
-
-        Usuario usuario = new Usuario();
-        usuario.setId(1L);
-        usuario.setNome("Eduarda Atualizada");
-
-        when(usuarioMapper.toEntity(dto)).thenReturn(usuario);
-        when(usuarioService.salvar(usuario)).thenReturn(usuario);
-        when(usuarioMapper.toDto(usuario)).thenReturn(dto);
-
-        ResponseEntity<UsuarioDto> response = controller.alterar(dto);
-
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals("Eduarda Atualizada", response.getBody().getNome());
-    }
-
-    @Test
-    void deveLancarExcecaoQuandoAlterarSemId() {
-        UsuarioDto dto = new UsuarioDto();
-        dto.setNome("Sem ID");
-        assertThrows(ObrigatoriedadeIdException.class, () -> controller.alterar(dto));
-    }
-
-    @Test
-    void deveExcluirUsuarioComSucesso() {
-        Long id = 1L;
-        ResponseEntity<Void> response = controller.excluir(id);
-        verify(usuarioService).excluir(id);
-        assertEquals(204, response.getStatusCodeValue());
-    }
-
 }

@@ -1,28 +1,25 @@
 package br.com.attus.gerenciamentoprocessos.controller;
 
+import br.com.attus.gerenciamentoprocessos.Mocker;
 import br.com.attus.gerenciamentoprocessos.dto.ParteEnvolvidaDto;
 import br.com.attus.gerenciamentoprocessos.exceptions.ObrigatoriedadeIdException;
 import br.com.attus.gerenciamentoprocessos.mapper.ParteEnvolvidaMapper;
 import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvida;
-import br.com.attus.gerenciamentoprocessos.model.ParteEnvolvidaDocumento;
-import br.com.attus.gerenciamentoprocessos.model.enums.TipoDocumento;
-import br.com.attus.gerenciamentoprocessos.model.enums.TipoParteEnvolvida;
 import br.com.attus.gerenciamentoprocessos.service.ParteEnvolvidaService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class ParteEnvolvidaControllerUnitTest {
-
-    @InjectMocks
-    private ParteEnvolvidaController controller;
+class ParteEnvolvidaControllerTest {
 
     @Mock
     private ParteEnvolvidaService service;
@@ -30,95 +27,146 @@ class ParteEnvolvidaControllerUnitTest {
     @Mock
     private ParteEnvolvidaMapper mapper;
 
-    @Test
-    void deveInserirParteEnvolvidaComSucesso() {
-        ParteEnvolvidaDto inputDto = new ParteEnvolvidaDto();
-        inputDto.setNomeCompleto("Maria Teste");
-        inputDto.setTipoParteEnvolvida(TipoParteEnvolvida.AUTOR);
-        inputDto.setTelefone("(11) 99999-0000");
-        inputDto.setEmail("maria@email.com");
+    private ParteEnvolvidaController controller;
 
-        ParteEnvolvidaDocumento documento = new ParteEnvolvidaDocumento();
-        documento.setId(1L);
-        documento.setTipoDocumento(TipoDocumento.CPF);
-        documento.setValor("123.456.789-00");
+    private Mocker mocker = new Mocker();
 
-        ParteEnvolvida entidade = new ParteEnvolvida();
-        entidade.setId(1L);
-        entidade.setNomeCompleto("Maria Teste");
-        entidade.setTipoParteEnvolvida(TipoParteEnvolvida.AUTOR);
-        entidade.setTelefone("(11) 99999-0000");
-        entidade.setEmail("maria@email.com");
-        entidade.setDocumento(documento);
-
-        ParteEnvolvidaDto retornoDto = new ParteEnvolvidaDto();
-        retornoDto.setId(1L);
-        retornoDto.setNomeCompleto("Maria Teste");
-        retornoDto.setTipoParteEnvolvida(TipoParteEnvolvida.AUTOR);
-        retornoDto.setTelefone("(11) 99999-0000");
-        retornoDto.setEmail("maria@email.com");
-
-        when(mapper.toEntity(inputDto)).thenReturn(entidade);
-        when(service.salvar(entidade)).thenReturn(entidade);
-        when(mapper.toDto(entidade)).thenReturn(retornoDto);
-
-        ResponseEntity<ParteEnvolvidaDto> response = controller.inserir(inputDto);
-
-        assertEquals(201, response.getStatusCodeValue());
-        assertNotNull(response.getBody());
-        assertEquals("Maria Teste", response.getBody().getNomeCompleto());
-        assertEquals("maria@email.com", response.getBody().getEmail());
-
-        verify(service).salvar(entidade);
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        controller = new ParteEnvolvidaController(service, mapper);
     }
 
-    @Test
-    void deveAlterarParteEnvolvidaComSucesso() {
-        ParteEnvolvidaDto dto = new ParteEnvolvidaDto();
-        dto.setId(1L);
-        ParteEnvolvida entity = new ParteEnvolvida();
+    @Nested
+    class Dada_uma_parte_envolvida {
 
-        when(mapper.toEntity(dto)).thenReturn(entity);
-        when(service.salvar(entity)).thenReturn(entity);
-        when(mapper.toDto(entity)).thenReturn(dto);
+        private ParteEnvolvida entidade;
+        private ParteEnvolvidaDto dto;
 
-        ResponseEntity<ParteEnvolvidaDto> response = controller.alterar(dto);
+        @BeforeEach
+        void init() {
+            entidade = mocker.gerarParteEnvolvida(1L);
+            dto = mocker.gerarParteEnvolvidaDto(1L);
+        }
 
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(dto, response.getBody());
+        @Nested
+        class Quando_excluir {
+
+            @Nested
+            class Quando_nao_eh_possivel_excluir {
+
+                @Test
+                void Entao_deve_lancar_excecao() {
+                    doThrow(new IllegalStateException("Não é possível excluir")).when(service).excluir(1L);
+
+                    IllegalStateException exc = assertThrows(IllegalStateException.class, () -> controller.excluir(1L));
+
+                    assertEquals("Não é possível excluir", exc.getMessage());
+                    verify(service).excluir(1L);
+                }
+            }
+
+            @Nested
+            class Quando_excluir_com_sucesso {
+
+                @Test
+                void Entao_deve_retornar_status_204_e_corpo_nulo() {
+                    doNothing().when(service).excluir(1L);
+
+                    ResponseEntity<Void> response = controller.excluir(1L);
+
+                    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+                    assertNull(response.getBody());
+                    verify(service).excluir(1L);
+                }
+            }
+        }
+
+        @Nested
+        class Quando_buscar_por_id {
+
+            @Nested
+            class Quando_nao_encontrar {
+
+                @Test
+                void Entao_deve_retornar_404() {
+                    when(service.buscarPorId(1L)).thenThrow(new NoSuchElementException("Não encontrado"));
+
+                    ResponseEntity<ParteEnvolvidaDto> response = controller.buscarPorId(1L);
+
+                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+                    assertNull(response.getBody());
+                    verify(service).buscarPorId(1L);
+                }
+            }
+
+            @Nested
+            class Quando_encontrar {
+
+                @Test
+                void Entao_deve_retornar_status_200_e_dto() {
+                    when(service.buscarPorId(1L)).thenReturn(entidade);
+                    when(mapper.toDto(entidade)).thenReturn(dto);
+
+                    ResponseEntity<ParteEnvolvidaDto> response = controller.buscarPorId(1L);
+
+                    assertEquals(HttpStatus.OK, response.getStatusCode());
+                    assertEquals(dto, response.getBody());
+                    verify(service).buscarPorId(1L);
+                    verify(mapper).toDto(entidade);
+                }
+            }
+        }
+
+        @Nested
+        class Quando_alterar_sem_id {
+
+            @Test
+            void Entao_deve_lancar_obrigatoriedade_id_exception() {
+                ParteEnvolvidaDto dtoSemId = mocker.gerarParteEnvolvidaDto(null);
+
+                assertThrows(ObrigatoriedadeIdException.class, () -> controller.alterar(dtoSemId));
+            }
+        }
+
+        @Nested
+        class Quando_alterar {
+
+            @Test
+            void Entao_deve_alterar_e_retornar_status_200_e_dto() {
+                when(mapper.toEntity(dto)).thenReturn(entidade);
+                when(service.salvar(entidade)).thenReturn(entidade);
+                when(mapper.toDto(entidade)).thenReturn(dto);
+
+                ResponseEntity<ParteEnvolvidaDto> response = controller.alterar(dto);
+
+                assertEquals(HttpStatus.OK, response.getStatusCode());
+                assertEquals(dto, response.getBody());
+
+                verify(mapper).toEntity(dto);
+                verify(service).salvar(entidade);
+                verify(mapper).toDto(entidade);
+            }
+        }
+
+        @Nested
+        class Quando_inserir {
+
+            @Test
+            void Entao_deve_retornar_status_201_e_objeto() {
+                when(mapper.toEntity(dto)).thenReturn(entidade);
+                when(service.salvar(entidade)).thenReturn(entidade);
+                when(mapper.toDto(entidade)).thenReturn(dto);
+
+                ResponseEntity<ParteEnvolvidaDto> response = controller.inserir(dto);
+
+                assertEquals(HttpStatus.CREATED, response.getStatusCode());
+                assertEquals(dto, response.getBody());
+
+                verify(mapper).toEntity(dto);
+                verify(service).salvar(entidade);
+                verify(mapper).toDto(entidade);
+            }
+        }
     }
-
-    @Test
-    void deveLancarExcecaoQuandoAlterarSemId() {
-        ParteEnvolvidaDto dto = new ParteEnvolvidaDto();
-        assertThrows(ObrigatoriedadeIdException.class, () -> controller.alterar(dto));
-    }
-
-    @Test
-    void deveBuscarParteEnvolvidaPorIdComSucesso() {
-        Long id = 1L;
-        ParteEnvolvida entity = new ParteEnvolvida();
-        ParteEnvolvidaDto dto = new ParteEnvolvidaDto();
-        dto.setId(id);
-
-        when(service.buscarPorId(id)).thenReturn(entity);
-        when(mapper.toDto(entity)).thenReturn(dto);
-
-        ResponseEntity<ParteEnvolvidaDto> response = controller.buscarPorId(id);
-
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(dto, response.getBody());
-    }
-
-    @Test
-    void deveExcluirParteEnvolvidaComSucesso() {
-        Long id = 1L;
-
-        ResponseEntity<Void> response = controller.excluir(id);
-
-        verify(service).excluir(id);
-        assertEquals(204, response.getStatusCodeValue());
-        assertNull(response.getBody());
-    }
-
 }

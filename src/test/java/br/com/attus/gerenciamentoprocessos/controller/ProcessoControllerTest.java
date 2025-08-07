@@ -1,18 +1,19 @@
 package br.com.attus.gerenciamentoprocessos.controller;
 
-import br.com.attus.gerenciamentoprocessos.controller.ProcessoController;
 import br.com.attus.gerenciamentoprocessos.dto.ProcessoDto;
 import br.com.attus.gerenciamentoprocessos.exceptions.ObrigatoriedadeIdException;
 import br.com.attus.gerenciamentoprocessos.mapper.ProcessoMapper;
 import br.com.attus.gerenciamentoprocessos.model.Processo;
 import br.com.attus.gerenciamentoprocessos.model.enums.StatusProcesso;
 import br.com.attus.gerenciamentoprocessos.service.ProcessoService;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
-
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProcessoControllerUnitTest {
+class ProcessoControllerTest {
 
     @InjectMocks
     private ProcessoController controller;
@@ -33,109 +34,174 @@ class ProcessoControllerUnitTest {
     @Mock
     private ProcessoMapper mapper;
 
-    @Test
-    void deveInserirProcessoComSucesso() {
-        ProcessoDto dto = new ProcessoDto();
-        Processo entity = new Processo();
-        entity.setId(1L);
-        dto.setId(1L);
+    private Processo processo;
+    private ProcessoDto dto;
 
-        when(mapper.toEntity(dto)).thenReturn(entity);
-        when(service.salvar(entity)).thenReturn(entity);
-        when(mapper.toDto(entity)).thenReturn(dto);
-
-        ResponseEntity<ProcessoDto> response = controller.inserir(dto);
-
-        assertEquals(201, response.getStatusCodeValue());
-        assertEquals(dto, response.getBody());
-    }
-
-    @Test
-    void deveAlterarProcessoComSucesso() {
-        ProcessoDto dto = new ProcessoDto();
-        dto.setId(1L);
-        Processo entity = new Processo();
-        entity.setId(1L);
-
-        when(mapper.toEntity(dto)).thenReturn(entity);
-        when(service.salvar(entity)).thenReturn(entity);
-        when(mapper.toDto(entity)).thenReturn(dto);
-
-        ResponseEntity<ProcessoDto> response = controller.alterar(dto);
-
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(dto, response.getBody());
-    }
-
-    @Test
-    void deveLancarExcecaoQuandoAlterarSemId() {
-        ProcessoDto dto = new ProcessoDto(); // id null
-
-        assertThrows(ObrigatoriedadeIdException.class, () -> controller.alterar(dto));
-    }
-
-    @Test
-    void deveBuscarProcessoPorIdComSucesso() {
-        Long id = 1L;
-        Processo entity = new Processo();
-        ProcessoDto dto = new ProcessoDto();
-        dto.setId(id);
-
-        when(service.buscarPorId(id)).thenReturn(entity);
-        when(mapper.toDto(entity)).thenReturn(dto);
-
-        ResponseEntity<ProcessoDto> response = controller.buscarPorId(id);
-
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(dto, response.getBody());
-    }
-
-    @Test
-    void deveExcluirProcessoComSucesso() {
-        Long id = 1L;
-
-        ResponseEntity<Void> response = controller.excluir(id);
-
-        verify(service).excluir(id);
-        assertEquals(204, response.getStatusCodeValue());
-        assertNull(response.getBody());
-    }
-
-    @Test
-    void deveArquivarProcessoComSucesso() {
-        Long id = 1L;
-
-        ResponseEntity<Void> response = controller.arquivar(id);
-
-        verify(service).arquivarProcesso(id);
-        assertEquals(204, response.getStatusCodeValue());
-        assertNull(response.getBody());
-    }
-
-    @Test
-    void deveBuscarProcessosPorFiltrosComSucesso() {
-        StatusProcesso status = StatusProcesso.ATIVO;
-        LocalDate dataAbertura = LocalDate.of(2023, 1, 1);
-        String documento = "123456";
-
-        Processo processo = new Processo();
+    @BeforeEach
+    void setup() {
+        processo = new Processo();
         processo.setId(1L);
-
-        ProcessoDto dto = new ProcessoDto();
+        dto = new ProcessoDto();
         dto.setId(1L);
+    }
 
-        Pageable pageable = PageRequest.of(0, 15);
-        Page<Processo> page = new PageImpl<>(List.of(processo), pageable, 1);
+    @Nested
+    class Dado_um_processo {
 
-        when(service.buscarPorFiltros(status, dataAbertura, documento, pageable)).thenReturn(page);
-        when(mapper.toDto(processo)).thenReturn(dto);
+        @Nested
+        class Quando_inserir {
 
-        ResponseEntity<Page<ProcessoDto>> response = controller.buscarPorFiltros(status, dataAbertura, documento, 0);
+            ResponseEntity<ProcessoDto> response;
 
-        assertEquals(200, response.getStatusCodeValue());
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().getTotalElements());
-        assertEquals(dto, response.getBody().getContent().get(0));
+            @BeforeEach
+            void setup() {
+                when(mapper.toEntity(dto)).thenReturn(processo);
+                when(service.salvar(processo)).thenReturn(processo);
+                when(mapper.toDto(processo)).thenReturn(dto);
+
+                response = controller.inserir(dto);
+            }
+
+            @Test
+            void Entao_deve_retornar_status_201_e_objeto() {
+                assertEquals(201, response.getStatusCodeValue());
+                assertEquals(dto, response.getBody());
+            }
+        }
+
+        @Nested
+        class Quando_alterar {
+
+            ResponseEntity<ProcessoDto> response;
+
+            @BeforeEach
+            void setup() {
+                when(mapper.toEntity(dto)).thenReturn(processo);
+                when(service.salvar(processo)).thenReturn(processo);
+                when(mapper.toDto(processo)).thenReturn(dto);
+
+                response = controller.alterar(dto);
+            }
+
+            @Test
+            void Entao_deve_retornar_status_200_e_objeto() {
+                assertEquals(200, response.getStatusCodeValue());
+                assertEquals(dto, response.getBody());
+            }
+        }
+
+        @Nested
+        class Quando_alterar_sem_id {
+
+            @Test
+            void Entao_deve_lancar_excecao() {
+                ProcessoDto dtoSemId = new ProcessoDto();
+                assertThrows(ObrigatoriedadeIdException.class, () -> controller.alterar(dtoSemId));
+            }
+        }
+
+        @Nested
+        class Quando_buscar_por_id {
+
+            @Nested
+            class Quando_encontrar {
+
+                ResponseEntity<ProcessoDto> response;
+
+                @BeforeEach
+                void setup() {
+                    when(service.buscarPorId(processo.getId())).thenReturn(processo);
+                    when(mapper.toDto(processo)).thenReturn(dto);
+
+                    response = controller.buscarPorId(processo.getId());
+                }
+
+                @Test
+                void Entao_deve_retornar_status_200_e_objeto() {
+                    assertEquals(200, response.getStatusCodeValue());
+                    assertEquals(dto, response.getBody());
+                }
+            }
+
+            @Nested
+            class Quando_nao_encontrar {
+
+                @Test
+                void Entao_deve_lancar_EntityNotFoundException() {
+                    when(service.buscarPorId(processo.getId())).thenThrow(new jakarta.persistence.EntityNotFoundException());
+                    assertThrows(jakarta.persistence.EntityNotFoundException.class, () -> {
+                        controller.buscarPorId(processo.getId());
+                    });
+                }
+            }
+        }
+
+        @Nested
+        class Quando_excluir {
+
+            ResponseEntity<Void> response;
+
+            @BeforeEach
+            void setup() {
+                response = controller.excluir(processo.getId());
+            }
+
+            @Test
+            void entao_deve_chamar_servico_e_retornar_204() {
+                verify(service).excluir(processo.getId());
+                assertEquals(204, response.getStatusCodeValue());
+                assertNull(response.getBody());
+            }
+        }
+
+        @Nested
+        class Quando_arquivar {
+
+            ResponseEntity<Void> response;
+
+            @BeforeEach
+            void setup() {
+                response = controller.arquivar(processo.getId());
+            }
+
+            @Test
+            void entao_deve_chamar_servico_e_retornar_204() {
+                verify(service).arquivarProcesso(processo.getId());
+                assertEquals(204, response.getStatusCodeValue());
+                assertNull(response.getBody());
+            }
+        }
+
+        @Nested
+        class Quando_buscar_por_filtros {
+
+            ResponseEntity<Page<ProcessoDto>> response;
+            Pageable pageable;
+            Page<Processo> page;
+
+            @BeforeEach
+            void setup() {
+                StatusProcesso status = StatusProcesso.ATIVO;
+                LocalDate dataAbertura = LocalDate.of(2023, 1, 1);
+                String documento = "123456";
+
+                pageable = PageRequest.of(0, 15);
+                page = new PageImpl<>(List.of(processo), pageable, 1);
+
+                when(service.buscarPorFiltros(status, dataAbertura, documento, pageable)).thenReturn(page);
+                when(mapper.toDto(processo)).thenReturn(dto);
+
+                response = controller.buscarPorFiltros(status, dataAbertura, documento, 0);
+            }
+
+            @Test
+            void entao_deve_retornar_status_200_e_pagina() {
+                assertEquals(200, response.getStatusCodeValue());
+                assertNotNull(response.getBody());
+                assertEquals(1, response.getBody().getTotalElements());
+                assertEquals(dto, response.getBody().getContent().get(0));
+            }
+        }
     }
 
 }

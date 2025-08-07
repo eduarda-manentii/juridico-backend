@@ -26,6 +26,12 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(EntityNotFoundException.class)
+    public Map<String, String> handleEntityNotFoundException(EntityNotFoundException ex) {
+        return Map.of("mensagem", ex.getMessage());
+    }
+
     @ExceptionHandler(TokenInvalidoException.class)
     public ResponseEntity<String> handleTokenInvalidoException(TokenInvalidoException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -63,12 +69,6 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Requisição mal formada.");
-    }
-
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(EntityNotFoundException.class)
-    public Map<String, String> handleEntityNotFoundException(EntityNotFoundException ex) {
-        return Map.of("mensagem", ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

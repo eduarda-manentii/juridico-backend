@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -55,13 +56,17 @@ public class AndamentoProcessualController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AndamentoProcessualDto> buscarPorId(@PathVariable("id") Long id) {
-        AndamentoProcessual andamentoProcessual = service.buscarPorId(id);
-        AndamentoProcessualDto dto = andamentoProcessualMapper.toDto(andamentoProcessual);
-        dto.add(linkTo(methodOn(AndamentoProcessualController.class).buscarPorId(id)).withSelfRel());
-        dto.add(linkTo(methodOn(AndamentoProcessualController.class).alterar(dto)).withRel("update"));
-        dto.add(linkTo(methodOn(AndamentoProcessualController.class).excluir(id)).withRel("delete"));
-        dto.add(linkTo(methodOn(AndamentoProcessualController.class).inserir(dto)).withRel("create"));
-        return ResponseEntity.ok(dto);
+        try {
+            AndamentoProcessual andamentoProcessual = service.buscarPorId(id);
+            AndamentoProcessualDto dto = andamentoProcessualMapper.toDto(andamentoProcessual);
+            dto.add(linkTo(methodOn(AndamentoProcessualController.class).buscarPorId(id)).withSelfRel());
+            dto.add(linkTo(methodOn(AndamentoProcessualController.class).alterar(dto)).withRel("update"));
+            dto.add(linkTo(methodOn(AndamentoProcessualController.class).excluir(id)).withRel("delete"));
+            dto.add(linkTo(methodOn(AndamentoProcessualController.class).inserir(dto)).withRel("create"));
+            return ResponseEntity.ok(dto);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -87,7 +92,7 @@ public class AndamentoProcessualController {
                     dto.add(linkTo(methodOn(AndamentoProcessualController.class).inserir(dto)).withRel("create"));
                     return dto;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         Page<AndamentoProcessualDto> pageDto = new PageImpl<>(dtos, pageable, pageEntidades.getTotalElements());
         return ResponseEntity.ok(pageDto);
