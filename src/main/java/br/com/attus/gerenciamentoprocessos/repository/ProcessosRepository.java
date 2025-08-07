@@ -10,24 +10,23 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Repository
 public interface ProcessosRepository extends JpaRepository<Processo, Long> {
 
     @Query("""
-    SELECT DISTINCT p FROM Processo p
-    JOIN p.partesEnvolvidas parte
-    JOIN parte.documento doc
-    WHERE (:status IS NULL OR p.status = :status)
-      AND (p.dataAbertura = :dataAbertura)
-      AND (:documento IS NULL OR doc.valor = :documento)
+        SELECT DISTINCT p FROM Processo p
+        JOIN p.partesEnvolvidas parte
+        LEFT JOIN parte.documento doc
+        WHERE (:status IS NULL OR p.status = :status)
+          AND (:dataAbertura IS NULL OR p.dataAbertura = :dataAbertura)
+          AND (:documento IS NULL OR doc.valor LIKE %:documento%)
     """)
     Page<Processo> buscarPorFiltros(
             @Param("status") StatusProcesso status,
             @Param("dataAbertura") LocalDate dataAbertura,
             @Param("documento") String documento,
-            @Param("pagincao") Pageable pagincao
+            Pageable pageable
     );
 
     boolean existsByAndamentoProcessual_Id(Long andamentoProcessualId);

@@ -31,6 +31,8 @@ class ProcessoMapperTest {
         processoMapper = new ProcessoMapper(parteEnvolvidaMapper, andamentoProcessualMapper);
     }
 
+
+
     @Test
     void testToDto() {
         ParteEnvolvida parte1 = new ParteEnvolvida();
