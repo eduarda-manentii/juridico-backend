@@ -16,8 +16,6 @@ import java.util.List;
 @Builder
 public class ProcessoDto extends RepresentationModel<ProcessoDto> {
 
-    private Long id;
-
     @NotNull(message = "Data de abertura é obrigatória")
     private LocalDate dataAbertura;
 

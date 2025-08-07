@@ -15,8 +15,6 @@ import java.time.LocalDate;
 @Builder
 public class AndamentoProcessualDto extends RepresentationModel<AndamentoProcessualDto> {
 
-    private Long id;
-
     @NotNull(message = "O tipo do andamento processual é obrigatório")
     private TipoAndamentoProcessual tipoAndamentoProcessual;
 

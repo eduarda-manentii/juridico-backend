@@ -13,8 +13,6 @@ import org.springframework.hateoas.RepresentationModel;
 @Builder
 public class UsuarioDto extends RepresentationModel<UsuarioDto> {
 
-    private Long id;
-
     @NotEmpty(message = "Nome é obrigatório")
     private String nome;
 
